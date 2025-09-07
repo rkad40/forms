@@ -1,0 +1,35 @@
+{% load assets %}
+{% load maven %}
+<div id="{{ id }}" class="maven">
+	<div class="maven-exlorer">
+		<div class="maven-wrapper">
+			<div class="button-bar">
+				<div class="ribbon"></div>
+			</div>
+			<div class="main-gutter"></div>
+			<div class="crumbs-wrapper">
+				<div class="crumbs">
+					<table mid="{{ id }}">
+						<tr class="crumbs-data">
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="main-gutter"></div>
+			<div class="main-content">
+				<div class="dir-label"><div class="text">Directories</div></div>
+				<div class="gutter-1"></div>
+				<div class="file-label"><div class="text">Files</div></div>
+				<div class="carriage-return"></div>
+				<div class="dir-list"></div>
+				<div class="gutter-2"></div>
+				<div class="file-list"></div>
+			</div>
+			<div class="footer">
+				<div class="text"></div>
+			</div>
+			<input type="hidden" class="state">
+		</div>
+	</div>
+</div>
+

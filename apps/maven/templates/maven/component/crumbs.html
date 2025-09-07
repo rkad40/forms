@@ -1,0 +1,31 @@
+{% load assets %}
+{% load maven %}
+
+{% spaceless %}
+<td class="dir-crumb dir-crumb-base crumb-image crumb-button" onclick="mavenSelectDir('{{id}}', 'dir-crumb-base', '', '')">
+<img class="crumb-item" src="{% static 'maven/img/20/folder.png' %}">
+{% if not maven.crumbs %}
+	{% if maven.access == 1 %}
+		&nbsp;<i class="crumb-lock fas fa-lock"></i>
+	{% elif maven.access == 0 %}
+		&nbsp;<i class="crumb-lock fas fa-lock"></i>
+	{% endif %}
+{% endif %}
+{% endspaceless %}
+</td>
+{% for crumb in maven.crumbs %}
+	{% spaceless %}
+		<td class="chevron"><i class="fas fa-chevron-right"></i></td>
+		{% if forloop.last %}
+			<td>{{ crumb.name }}
+			{% if maven.access == 1 %}
+				&nbsp;<i class="crumb-lock fas fa-lock"></i>
+			{% elif maven.access == 0 %}
+				&nbsp;<i class="crumb-lock fas fa-lock"></i>
+			{% endif %}
+			</td>
+		{% else %}
+			<td class="dir-crumb dir-crumb-{{ forloop.counter0 }} crumb-button no-select-text" onclick="mavenSelectDir('{{id}}', 'dir-crumb-{{ forloop.counter0 }}', '{{ crumb.name }}', '{{ crumb.url }}')">{{ crumb.name }}</td>
+		{% endif %}
+	{% endspaceless %}
+{% endfor %}

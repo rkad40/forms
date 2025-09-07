@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+{% load static %}
+{% load assets %}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>{{ site.title }}</title>
+<meta content="" name="description">
+<meta content="" name="keywords">
+<style>
+:root {
+	--PrimaryBackgroundColor: {{ site.primary_bg_color }};
+	--PrimaryBackgroundColor10: {{ site.primary_bg_color_10 }};
+	--PrimaryBackgroundColor20: {{ site.primary_bg_color_20 }};
+	--PrimaryForegroundColor: {{ site.primary_fg_color }};
+}
+</style>
+<link href="{% static 'main/site/img/favicon.png' %}" rel="icon">
+<link href="{% static 'main/site/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+<link href="{% static 'main/site/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+<link href="{% static 'main/site/vendor/icofont/icofont.min.css' %}" rel="stylesheet">
+<link href="{% static_reload 'main/site/vendor/dialog/dialog.css' %}" rel="stylesheet">
+<link href="{% static 'main/site/vendor/flatpickr/flatpickr_material_blue.css' %}" rel="stylesheet">
+<link href="{% static_reload 'main/site/css/site.css' %}" rel="stylesheet">
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'main/site/vendor/flatpickr/flatpickr.js' %}"></script>
+<script src="{% static 'main/site/vendor/dialog/dialog.js' %}"></script>
+{% block head-css-link %}{% endblock %}
+<style>
+/* forms.css */
+
+h2 {
+	font-size: 28px !important;
+	font-weight: 700 !important;
+}
+
+form .field-wrapper {
+	margin-top: 20px;
+}
+
+form .header {
+	font-size: 20px !important;
+	font-weight: 600 !important;
+	color: var(--PrimaryBackgroundColor) !important;
+	position: relative;
+	top: 0px;
+}
+
+form .field-wrapper .help, form .field-wrapper .help *, form .help, form .help * {
+	font-size: 14px !important;
+	line-height: 14px !important;
+	margin-bottom: 5px;
+
+}
+
+form .field-wrapper input, form .field-wrapper select, form .field-wrapper textarea {
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 1rem;
+	box-sizing: border-box;
+}
+
+form .field-wrapper input:focus, form .field-wrapper select:focus, form .field-wrapper textarea:focus {
+	border-color: #0077cc;
+	outline: none;
+}
+
+form .field-wrapper input[type="radio"] {
+	width: 20px;
+}
+
+form .field-wrapper input[type="radio"]:checked + label {
+	background-color: #0077cc;
+	color: white;
+}
+
+form .field-wrapper.blink {
+	background-color: #ddd;
+}
+
+form .field-wrapper label {
+	font-size: 18px !important;
+}
+
+form .field-wrapper .error, .form-error {
+	font-size: 14px !important;
+	line-height: 16px !important;
+	font-weight: 600 !important;
+	color: #7a0101;
+	margin-top: 4px;
+	background-color: #d9abab;
+	border: 1px solid #7a0101;
+	padding: 5px;
+	border-radius: 4px;
+}
+
+form .spacer {
+	height: 20px;
+}
+
+form button {
+	padding: 8px 10px;
+	background-color: var(--PrimaryBackgroundColor);
+	color: white;
+	border: none;
+	border-radius: 4px;
+	font-size: 18px;
+	cursor: pointer;
+	margin-right: 0.5rem;
+}
+
+form button:hover {
+	background-color: var(--PrimaryBackgroundColor20);
+}
+
+</style>
+<script>"use strict"; var IS_ADMIN = false;</script>
+<script>var SITE_DEBUG = {% site_debug %};</script>
+<script>var HTTP_STATIC_URL = "{% http_static_url %}";</script>
+<script>var HTTP_MEDIA_URL = "{% http_media_url %}";</script>
+<script src="{% static 'main/site/vendor/fontawesome/all.js' %}"></script>
+</head>
+<body>
+<a name="home"></a>
+<nav id="site-navbar" class="navbar fixed-top navbar-expand-xl navbar-dark bg-dark" style="border-bottom: 2px solid #ccc;">
+<div class="container-xl">
+<a class="navbar-brand" href="{% url 'home' %}">
+<img style="width: 25vw; min-width: 120px; max-width: 150px; height: auto; margin-left: -5px" src="{{ site.icon|safe }}">
+</a>
+<!--
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#page-navbar"
+aria-controls="page-navbar" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+-->
+</div>
+</nav>
+<div id="content" class="section">
+{% block content %}{% endblock %}
+<div style="height: 200px;"></div>
+</div>
+<script>
+$(document).ready(function () {
+
+function FieldManager() {
+    let me = this;
+    me.$scope = $('form'); // or pass in a selector if needed
+	me.isInitializing = true;
+
+    me.getValue = function(fieldName) {
+        const $field = me.$scope.find(`[name="${fieldName}"]`);
+        if (!$field.length) return null;
+        const type = $field.attr('type');
+        if (type === 'checkbox') return $field.prop('checked');
+        if (type === 'radio') {
+            const $checked = me.$scope.find(`[name="${fieldName}"]:checked`);
+            return $checked.length ? $checked.val() : null;
+        }
+        return $field.val();
+    };
+
+	me.setValue = function(fieldName, fieldValue) {
+		const $fields = me.$scope.find(`[name="${fieldName}"]`);
+		if (!$fields.length) return;
+		const type = $fields.attr('type');
+		if (type === 'checkbox') {
+			$fields.prop('checked', !!fieldValue);
+			return;
+		}
+		if (type === 'radio') {
+			$fields.each(function () {
+				const $radio = $(this);
+				$radio.prop('checked', $radio.val() === fieldValue);
+			});
+			return;
+		}
+		// Covers input[type=text], textarea, select, etc.
+		$fields.val(fieldValue).trigger('change');
+	};
+
+    me.show = function(fieldName) {
+		if (me.isInitializing) {
+			$(`#id_wrapper_${fieldName}`).show();
+			return;
+		}
+		if (!($(`#id_wrapper_${fieldName}`).is(':visible'))) {
+			const $wrapper = $(`#id_wrapper_${fieldName}`);
+			$(`#id_wrapper_${fieldName}`).show(200);
+			$wrapper.addClass('blink').fadeTo(100, 1, function () {
+				$wrapper.fadeTo(100, 1, function () {
+					$wrapper.removeClass('blink');
+				});
+			});
+        }
+    };
+
+    me.hide = function(fieldName) {
+		if (me.isInitializing) {
+			$(`#id_wrapper_${fieldName}`).hide();
+			return;
+		}
+		if ($(`#id_wrapper_${fieldName}`).is(':visible')) {
+			const $wrapper = $(`#id_wrapper_${fieldName}`);
+			$wrapper.addClass('blink').fadeTo(100, 1, function () {
+				$wrapper.fadeTo(100, 1, function () {
+					$wrapper.removeClass('blink');
+					$(`#id_wrapper_${fieldName}`).hide(200);
+				});
+			});
+		}
+        
+    };
+
+	me.updateForm = function() {
+        {% block form-logic %}{% endblock %}
+	}
+
+    me.bindFieldEvents = function() {
+        me.$scope.find('.field-wrapper')
+            .find('input, textarea, select')
+            .on('change input', function (event) {
+                const $field = $(event.target);
+                const fieldName = $field.attr('name');
+                if (!fieldName) return;
+                me.updateForm();
+            });
+    };
+
+    me.init = function() {
+        me.bindFieldEvents();
+		me.updateForm()
+		me.isInitializing = false;
+    };
+}
+
+let fm = new FieldManager();
+fm.init();
+
+{% block ready-function %}{% endblock %}
+flatpickr(".flatpickr", {
+	dateFormat: "Y-m-d",  // Matches Django's default format
+	allowInput: true,
+});
+
+});
+
+{% block script %}{% endblock %}
+
+</script>
+</body>
+</html>

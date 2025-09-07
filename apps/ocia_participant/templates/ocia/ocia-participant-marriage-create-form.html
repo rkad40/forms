@@ -1,0 +1,31 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Marriage Info</h2>
+<form method="post">
+  {% csrf_token %}
+  {% include "ocia/progress.html" with node_index=2 %}
+  {% include "main/form.html" %}
+  <div class="spacer"></div>
+  <div class="header">Another Marriage...</div>
+  <div class="help">Do you have another marriage to record? If so, click <strong>Add</strong>:</div>
+  <button type="submit" name="add_another"><i class="fas fa-plus"></i> Add</button>
+  <div class="spacer"></div>
+  <div class="header">...No, All Done!</div>
+  <div class="help">If you have recorded all marriages, please click <strong>Next</strong> to continue to the next (and last) form:</div>
+  <button type="submit" name="next"><i class="fas fa-arrow-right"></i> Next</button>
+</form>
+{% endblock %}
+
+{% block form-logic %}
+	if (me.getValue("status") == "divorced") 
+	{
+		me.show("date_of_divorce");
+	}
+	if (me.getValue("status") != "divorced") 
+	{
+		me.hide("date_of_divorce");
+	}
+{% endblock %}

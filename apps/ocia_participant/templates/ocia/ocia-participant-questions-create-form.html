@@ -1,0 +1,16 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant – Questions</h2>
+<form method="post">
+  {% csrf_token %}
+  {% include "ocia/progress.html" with node_index=4 %}
+  {% include "main/form.html" %}
+  <div class="spacer"></div>  
+  <div class="header">Save Your Data</div>
+  <div class="help">You have completed the OCIA Participant form. Please click <strong>Save</strong> to save your information.</div>
+  <button type="submit"><i class="fas fa-save"></i> Save</button>
+</form>
+{% endblock %}

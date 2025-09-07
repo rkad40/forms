@@ -1,0 +1,15 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Email Access</h2>
+<p>An email with an access code has been sent to the email address you specified. Please complete the login process by clicking on the link or copy-pasting it into a browser.</p>
+{% if fake %}
+<p>Because this is a debug session, the link is listed below:</p>
+<a href="{{ url|safe }}">{{ url|safe }}</a>
+{% endif%}
+{% endblock %}
+
+{% block form-logic %}
+{% endblock %}

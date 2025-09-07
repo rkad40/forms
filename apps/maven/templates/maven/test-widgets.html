@@ -1,0 +1,37 @@
+{% extends "maven/base.html" %}
+{% load assets %}
+{% load maven %}
+
+{% block cssfile %}
+{{ block.super }}
+{% include "maven/component/css-file.html" %}
+<link href="{% static_reload 'maven/custom.css' %}" type="text/css" media="all" rel="stylesheet">
+{{ form.media }}
+{% endblock %}
+
+{% block content %}
+<div class="fire-form">
+	<form action="" method="POST" enctype="multipart/form-data">
+		{% csrf_token %}
+		{% for field in form %}
+			<div class="title">{{ field.label_tag }}</div>
+			{{ field }}
+			{{ field.errors }}
+			{% if field.help_text %}
+			<p class="help">{{ field.help_text|safe }}</p>
+			{% endif %}
+		{% endfor %}
+		<div style="height: 5px;"></div>
+		<input type="submit" value="Submit">
+	</form>
+</div>
+{% endblock %}
+
+{% block jsfile %}
+{{ block.super }}
+{% endblock %}
+
+{% block script %}
+{{ block.super }}
+{% include "maven/component/script-vars.html" %}
+{% endblock %}

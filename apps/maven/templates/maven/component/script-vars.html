@@ -1,0 +1,16 @@
+{% load assets %}
+{% load maven %}
+{% csrf_token %}
+
+<script>
+"use strict";
+var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+var MAVEN_STATIC_URL = "{% static '' %}";
+var MAVEN_CONST = {
+	'url': {
+		'static': "{% static '' %}",
+		'refresh': "{% url 'maven-refresh' %}",
+	},
+	'version': '1.001',
+};
+</script>

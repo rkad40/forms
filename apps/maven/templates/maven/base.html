@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% load assets %}
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Explorer</title>
+<link rel="stylesheet" type="text/css" href="{% static_reload 'main/site/vendor/dialog/dialog.css' %}">
+{% block cssfile %}{% endblock %}
+
+{% block style %}{% endblock %}
+</head>
+
+<body>
+<div id="main-content">
+{% block content %}
+{% endblock %}
+</div>
+
+{% block jsfile %}{% endblock %}
+{% block script %}{% endblock %}
+
+</body>
+
+</html>

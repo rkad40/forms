@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loader Example</title>
+<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> -->
+<link rel="stylesheet" type="text/css" href="dialog.css">
+<style>
+body{font-family: Calibri;}
+button{padding: 10px;}
+pre {margin-left: 40px; padding-left: 40px;}
+</style>
+</head>
+<body>
+<h1>Demo</h1>
+<p>Want to see how it works?  Click on any of the buttons below:</p>
+<button id="Dialog1" onclick="javascript:BasicInfoDialog();">Info</button>
+<button id="Dialog2" onclick="javascript:BasicErrorDialog();">Error</button>
+<button id="Dialog3" onclick="javascript:BasicWarningDialog();">Warning</button>
+<button id="Dialog4" onclick="javascript:CustomNestedDialog();">Nested</button>
+<button id="Dialog5" onclick="javascript:BasicScrollerTextDialog();">Scroller</button>
+<button id="Dialog6" onclick="javascript:FullyCustomizedDialog();">Custom</button>
+<h1>Getting Started</h1>
+
+<p>In HTML do the following:</p>
+<pre><code class="language-html line-numbers">
+&#x3C;link rel=&#x22;stylesheet&#x22; type=&#x22;text/css&#x22; href=&#x22;dialog.css&#x22;&#x3E;
+&#x3C;script src=&#x22;dialog.js&#x22;&#x3E;&#x3C;/script&#x3E;
+</code></pre>
+
+<p>To create a basic information dialog:</p>
+<pre><code class="language-javascript line-numbers">
+let dialog = new Dialog();
+dialog.Info(&#x22;This is a test.&#x22;);	
+</code></pre>
+<a href="javascript:BasicInfoDialog()">Example</a>
+
+<p>To create a basic information dialog:</p>
+<pre><code class="language-javascript line-numbers">
+let dialog = new Dialog();
+dialog.Error(&#x22;Sorry, there was an error.  Please try again.&#x22;);	
+</code></pre>
+<a href="javascript:BasicErrorDialog()">Example</a>
+
+<p>To create a basic warning dialog:</p>
+<pre><code class="language-javascript line-numbers">
+let dialog = new Dialog();
+dialog.Warning(&#x22;If you continue, there will be consequences.&#x22;);	
+</code></pre>
+<a href="javascript:BasicWarningDialog()">Example</a>
+
+<p>Canned dialog algorithms <code>Info()</code>, <code>Error()</code> and <code>Warning()</code> can be customized using the explicit, or long, argument form.  In fact, all of three of these are just invocations of the <strong>Dialog</strong> class <code>Message()</code> method.  Here is an identical implementation of the <code>Warning()</code> method using the long argument form and the <code>Message()</code> method:</p>
+<pre><code class="language-javascript line-numbers">
+let dialog = new Dialog();
+dialog.Message
+(
+&#x9;{
+&#x9;&#x9;Title: &#x27;Warning&#x27;, 
+&#x9;&#x9;Icon: &#x27;warning&#x27;,
+&#x9;&#x9;Content: &#x27;&#x3C;p&#x3E;If you continue, there will be consequences.&#x3C;/p&#x3E;&#x27;,
+&#x9;&#x9;Width: 400, 
+&#x9;&#x9;Height: 200,
+&#x9;&#x9;Buttons:
+&#x9;&#x9;[
+&#x9;&#x9;&#x9;{Name: &#x27;OK&#x27;, Function: dialog.Close},
+&#x9;&#x9;],
+&#x9;&#x9;OnClose: dialog.Close,
+&#x9;}
+);
+</code></pre>
+
+<p><code>Icon</code> specifies the icon image to show on the left hand side.  Valid values are "info", "question", "error" and "warning".  Alternatively, you can specify a path to an image.</p>
+<p><code>OnClose</code> defines a function to be called when the header bar close button is clicked.</p>
+
+<p>To create a scrolling text dialog:</p>
+<pre><code class="language-javascript line-numbers">
+let dialog = new Dialog();
+dialog.ScrollText
+(
+&#x9;{
+&#x9;&#x9;Title: &#x27;Lorem Ipsum Scrolling Text&#x27;,
+&#x9;&#x9;Content: &#x27;&#x3C;p style=&#x22;margin-top: 0px;&#x22;&#x3E;Long text goes here ...&#x3C;/p&#x3E;&#x27;,
+&#x9;}
+);	
+</code></pre>
+<a href="javascript:BasicScrollerTextDialog()">Example</a>
+
+<p>Use the <code>Launch()</code> method to create a custom dialog (with all available options):</p>
+<pre><code class="language-javascript line-numbers">
+let dialog = new Dialog();
+dialog.Launch
+(
+&#x9;{
+&#x9;&#x9;Title: &#x27;Custom Dialog&#x27;,
+&#x9;&#x9;Width: 500,
+&#x9;&#x9;Height: 400,
+&#x9;&#x9;Content: &#x27;&#x3C;p&#x3E;Content goes here.&#x3C;/p&#x3E;&#x27;,
+&#x9;&#x9;Buttons:
+&#x9;&#x9;[
+&#x9;&#x9;&#x9;{Name: &#x27;Test&#x27;, Function: function(){alert(&#x27;You clicked &#x22;Test&#x22;.&#x27;); dialog.Close();}},
+&#x9;&#x9;&#x9;{Name: &#x27;Exit&#x27;, Function: dialog.Close},
+&#x9;&#x9;],
+&#x9;&#x9;OnClose: dialog.Close,
+&#x9;}
+);
+</code></pre>
+<a href="javascript:FullyCustomizedDialog()">Example</a>
+<p><code>Launch()</code> differs from <code>Message()</code> in that it does not render a left hand side image.</p>
+<a href="javascript:DemoDialog()">Demo dialog.</a>
+</body>
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script> -->
+<!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> -->
+<script 
+src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
+integrity="sha384-abc123xyz456" 
+crossorigin="anonymous"
+></script>
+
+<script>if (window.module) module = window.module;</script>
+<script src="dialog.js"></script>
+
+<script>
+let globalDialog = new Dialog();
+
+function BasicInfoDialog()
+{
+	// let dialog = new Dialog();
+	globalDialog.Info("This is a test.");
+};
+
+function BasicErrorDialog()
+{
+	let dialog = new Dialog();
+	dialog.Error("This is an error message.");
+};
+
+function BasicWarningDialog()
+{
+	let dialog = new Dialog();
+	dialog.Warning("This is a test.");
+};
+
+function CustomNestedDialog()
+{
+	LaunchNestedDialog(1);
+};
+
+function BasicScrollerTextDialog()
+{
+	let dialog = new Dialog();
+	dialog.ScrollText
+	(
+		{
+			Title: 'Lorem Ipsum Scrolling Text',
+			Content: '<p style="margin-top: 0px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>' +
+				'<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>',
+		}
+	);
+};
+
+function FullyCustomizedDialog()
+{
+	let dialog = new Dialog();
+	dialog.Launch
+	(
+		{
+			Title: 'Custom Dialog',
+			Width: 500,
+			Height: 470,
+			Content: 
+				'<div style="font-weight: bold; font-size: 28px;">Hello World!</div>' +
+				'<img src="dev/smiley.png" style="width: 100%; height: auto;">',
+			Buttons:
+			[
+				{Name: 'Test', Function: function(){BasicInfoDialog();}},
+				{Name: 'Exit', Function: dialog.Close},
+			],
+			// OnClose: function(){alert('You clicked the button marked "X"!'); dialog.Close();},
+		}
+	);
+};
+
+function LaunchNestedDialog(i)
+{
+	let j = i + 1;
+	let dialog = new Dialog();
+	dialog.Launch
+	(
+		{
+			Title: `Dialog ${i}`,
+			Content: `This is the level ${i} of a nested dialog window.`,
+			Buttons:
+			[
+				{Name: `Launch ${j}`, Function: function(){LaunchNestedDialog(j);} },
+				{Name: `Show Info`, Function: function(){BasicInfoDialog();} },
+				{Name: `Throw Error`, Function: function(){BasicErrorDialog();} },
+				{Name: `Issue Warning`, Function: function(){BasicWarningDialog();} },
+				{Name: `Close`, Function: dialog.Close},
+			]
+		}
+	);
+};
+
+function DemoDialog()
+{
+	let dialog = new Dialog();
+	dialog.Launch
+	(
+		{
+			Title: 'Custom Dialog',
+			Width: 500,
+			Height: 470,
+			Content: 
+				'<div style="font-weight: bold; font-size: 28px;">Hello World!</div>' +
+				'<img src="dev/smiley.png" style="width: 100%; height: auto;">',
+			Buttons:
+			[
+				{Name: `Refresh`, Function: function(){dialog.Refresh();} },
+				{Name: `Close`, Function: dialog.Close},
+			]
+		}
+	);
+};
+
+</script>
+</html>

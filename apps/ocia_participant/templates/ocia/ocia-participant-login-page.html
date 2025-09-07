@@ -1,0 +1,18 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Login</h2>
+<p>To login, please enter your email address in the input below and click <strong>Login</strong>. You will be sent an email with additional instructions.</p>
+<form method="post">
+  {% csrf_token %}
+  {% include "main/form.html "%}
+  {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+  <div class="spacer"></div>
+  <button type="submit"><i class="fas fa-unlock"></i> Login</button>
+</form>
+{% endblock %}
+
+{% block form-logic %}
+{% endblock %}

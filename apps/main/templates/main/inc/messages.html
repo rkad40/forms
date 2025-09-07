@@ -1,0 +1,15 @@
+{% load static %}
+{% load assets %}
+{% if messages %}
+	{% for message in messages %}
+		<div class="alert alert-{{ message.tags|alert:'type' }} alert-dismissible fade show"
+			style="width: 100%; margin: 0 0 0 0;  margin-bottom: 15px;" role="alert">
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true"><i class="fas fa-times"></i></span>
+			</button>
+			<div class="text">
+			<strong>{{ message.tags|alert:'glyph'|safe }} {{ message.tags|alert:'label' }}</strong>: {{ message | safe }}
+			</div>
+		</div>
+	{% endfor %}
+{% endif %}

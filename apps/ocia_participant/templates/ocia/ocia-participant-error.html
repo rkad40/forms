@@ -1,0 +1,10 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Error</h2>
+{% if message %}
+<p>{{ message|safe }}</p>
+{% endif %}
+{% endblock %}

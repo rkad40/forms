@@ -1,0 +1,25 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant – Marriage Info</h2>
+<form method="post">
+  {% csrf_token %}
+  {% include "main/form.html" %}
+  <div class="spacer"></div>
+  <button type="submit" name="save"><i class="fas fa-save"></i> Save</button> 
+  <button type="submit" name="cancel"><i class="fas fa-times"></i> Cancel</button>
+</form>
+{% endblock %}
+
+{% block form-logic %}
+	if (me.getValue("status") == "divorced") 
+	{
+		me.show("date_of_divorce");
+	}
+	if (me.getValue("status") != "divorced") 
+	{
+		me.hide("date_of_divorce");
+	}
+{% endblock %}

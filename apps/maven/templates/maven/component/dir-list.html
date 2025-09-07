@@ -1,0 +1,19 @@
+{% load assets %}
+{% load maven %}
+
+{% if maven.has_parent %}
+<div id="{{ id }}-dir-button-base" onclick="mavenSelectDir('{{id}}', '{{ id }}-dir-button-base', '', '{{ maven.parent_url }}')" class="dir-entry">
+	<div class="image"><img src="{% static 'maven/img/20/folderup.png' %}"></div>
+	<div class="content">
+		<div class="dirname no-select-text">..</div>
+	</div>
+</div>
+{% endif %}
+{% for dir in maven.dirs %}
+<div id="{{ id }}-dir-button-{{ forloop.counter0 }}" onclick="mavenSelectDir('{{id}}', '{{ id }}-dir-button-{{ forloop.counter0 }}', '{{ dir.name }}', '{{ dir.url }}')" class="dir-entry">
+	<div class="image"><img src="{% static 'maven/img/20/folder.png' %}"></div>
+	<div class="content">
+		<div class="dirname no-select-text">{{ dir.name }}</div>
+	</div>
+</div>
+{% endfor %}

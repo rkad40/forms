@@ -1,0 +1,57 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Religion Info</h2>
+<form method="post">
+  {% csrf_token %}
+  {% include "main/form.html" %}
+  <div class="spacer"></div>
+  <button type="submit" name="save"><i class="fas fa-save"></i> Save</button> 
+  <button type="submit" name="cancel"><i class="fas fa-times"></i> Cancel</button>
+</form>
+{% endblock %}
+
+{% block form-logic %}
+	if (me.getValue("affiliation") == "other") 
+	{
+		me.show("affiliation_other");
+	}
+	else
+	{
+		me.hide("affiliation_other");
+	}
+	if (me.getValue("baptized") == "yes" && me.getValue("baptized_denomination") == "other") 
+	{
+		me.show("baptized_denomination_other");
+	}
+	else
+	{
+		me.hide("baptized_denomination_other");
+	}
+	if (me.getValue("baptized") == "yes")
+	{
+		me.show("baptized_denomination");
+		me.show("baptized_on");
+		me.show("baptism_info");
+	}
+	else
+	{
+		me.hide("baptized_denomination");
+		me.hide("baptized_on");
+		me.hide("baptism_info");
+	}
+	if (me.getValue("baptized") == "yes" && me.getValue("baptized_denomination") == "Catholic") 
+	{
+		me.show("sacrament_of_confession");
+		me.show("sacrament_of_communion");
+		me.show("sacrament_of_confirmation");
+	}
+	else
+	{
+		me.hide("sacrament_of_confession");
+		me.hide("sacrament_of_communion");
+		me.hide("sacrament_of_confirmation");
+	}
+{% endblock %}

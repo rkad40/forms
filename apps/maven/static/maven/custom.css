@@ -1,0 +1,40 @@
+.fire-form * {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.fire-form .title {
+	font-size: 18px;
+	font-weight: bold;
+	height: 24px;
+}
+
+.maven-standard-widget .button-panel {
+	height: 40px;
+}
+
+.maven-standard-widget .button-panel .maven-button {
+	background-color: #777;
+	color: #fff;
+	padding: 10px;
+	border-radius: 5px;
+	text-decoration: none;
+}
+
+.maven-standard-widget .button-panel .maven-button:hover {
+	background-color: #666;
+}
+
+.maven-standard-widget .button-panel .maven-button:active {
+	background-color: #777;
+	color: #ddd;
+}
+
+.maven-standard-widget .maven-input-panel {
+	height: 50px;
+}
+
+.maven-standard-widget .maven-input-panel input {
+	height: 30px;
+	width: 500px;
+}
+

@@ -1,0 +1,219 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - {{ participant }}</h2>
+
+<style>
+.ocia-nav .category {
+	font-weight: 700 !important;
+	margin-top: 15px;
+	font-size: 24px !important;
+	color: var(--PrimaryBackgroundColor) !important;
+} 
+.ocia-nav .category ul {
+	margin-top: 0px !important;
+	margin-bottom: 0px !important;
+	padding-top: 0px !important;
+	padding-bottom: 0px !important;
+}
+.spacer {
+	height: 20px;
+}
+
+.ocia-nav ul {
+	margin: 10px 0 0 0 !important;
+} 
+
+.ocia-nav ul li {
+	margin-left: 30px !important;
+	line-height: 35px !important;
+} 
+
+
+.ocia-nav .button {
+	/* background-color: var(--PrimaryBackgroundColor); */
+	/* color:#ffffff; */
+	background-color: #fff;
+	color: #000;
+	border: 1px solid #666;
+	font-weight: 700 !important;
+	border-radius:28px;
+	display:inline-block;
+	cursor:pointer;
+	font-family:Arial;
+	font-size: 10px !important;
+	padding:0px 10px !important;
+	text-decoration:none;
+	position: relative;
+	top: -5px;
+}
+.ocia-nav .button * {
+	font-size: 10px !important;
+}
+.ocia-nav .button:hover {
+	/* background-color: var(--PrimaryBackgroundColor10); */
+	background-color: #ddd;
+}
+.ocia-nav .button:active {
+	position:relative;
+	top:-4px;
+}
+.ocia-nav ul li {
+	margin-left: 45px !important;
+}
+
+</style>
+
+<p>You can review and edit your OCIA participant information here:</p>
+<div style="height: 0px;"></div>
+
+<div class="ocia-nav">
+
+	{# Personal Information #}
+	<div class="category">
+		<img src="{% static 'ocia/img/icon/User.png' %}" style="width:32px; height:auto; position:relative; top:-5px;"> Personal Information 
+		<a class="button button-primary" href="{% url 'OCIAParticipantUpdateView' %}">
+		<i class="fas fa-pen"></i> Edit</a>
+	</div>
+
+	{# Religious Background #}
+	<div class="category">
+		<img src="{% static 'ocia/img/icon/Religion.png' %}" style="width:32px; height:auto; position:relative; top:-5px;"> Religious Background 
+		<a class="button button-primary" href="{% url 'OCIAParticipantReligionUpdateView' %}">
+		<i class="fas fa-pen"></i> Edit</a>
+	</div>
+
+	{# Marriages #}
+	{% with cnt=participant.parents.count %}
+		<div class="category">
+			<img src="{% static 'ocia/img/icon/Marriage.png' %}" style="width:32px; height:auto; position:relative; top:-5px;"> Marriage History 
+			<a class="button button-primary" href="{% url 'OCIAParticipantMarriageAddView' %}">
+			<i class="fas fa-plus"></i> Add</a>
+		<div>
+		{% if cnt > 0 %}
+			<ul>
+			{% for marriage in participant.marriages.all %}
+				<li>{{ marriage }} 
+				<a class="button button-primary" href="{% url 'OCIAParticipantMarriageUpdateView' pk=marriage.id %}">
+				<i class="fas fa-pen"></i> Edit</a>
+				<a class="button button-primary" href="javascript:DeleteRecord('marriage', '{{ marriage|safe|escapejs }}', {{ marriage.id|safe }});">
+				<i class="fas fa-trash-alt"></i> Delete</a>
+				</li>
+			{% endfor %}
+			</ul>
+		{% endif %}
+	{% endwith %}
+
+	{# Engagement #}
+	{% if participant.marital_status != 'married' %}
+	<div class="category">
+		<img src="{% static 'ocia/img/icon/Engagement.png' %}" style="width:32px; height:auto; position:relative; top:-5px;"> Engagement Details
+		{% if participant.engagement %}
+		<a class="button button-primary" href="{% url 'OCIAParticipantEngagementUpdateView'%}">
+		<i class="fas fa-pen"></i> Edit</a>
+		<ul>
+			<li>
+				{{ participant.engagement }}
+				<a class="button button-primary" href="{% url 'OCIAParticipantEngagementUpdateView'%}">
+				<i class="fas fa-pen"></i> Edit</a>
+				<a class="button button-primary" href="javascript:DeleteRecord('engagement', '{{ participant.engagement|safe|escapejs }}', {{ participant.engagement.id|safe }});">
+				<i class="fas fa-trash-alt"></i> Delete</a>
+
+			</li>
+		</ul>
+		{% else %}
+		<a class="button button-primary" href="{% url 'OCIAParticipantEngagementAddView'%}">
+		<i class="fas fa-plus"></i> Add</a>
+		{% endif %}
+	</div>
+	{% endif %}
+
+	{# Parents #}
+	{% with cnt=participant.parents.count %}
+		<div class="category">
+			<img src="{% static 'ocia/img/icon/Parents.png' %}" style="width:32px; height:auto; position:relative; top:-5px;"> Parent Information 
+			{% if cnt < 2%}<a class="button button-primary" href="{% url 'OCIAParticipantParentAddView'%}"><i class="fas fa-plus" href="{% url 'OCIAParticipantParentAddView' %}"></i> Add</a>{% endif %}
+		<div>
+		{% if cnt > 0 %}
+			<ul>
+				{% for parent in participant.parents.all %}
+					<li>
+						{{ parent }} 
+						<a class="button button-primary" href="{% url 'OCIAParticipantParentUpdateView' pk=parent.id %}">
+						<i class="fas fa-pen"></i> Edit</a>  
+						<a class="button button-primary" href="javascript:DeleteRecord('parent', '{{ parent|safe|escapejs }}', {{ parent.id|safe }});">
+						<i class="fas fa-trash-alt"></i> Delete</a>
+					</li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+	{% endwith %}
+
+	{# Questions #}
+	<div class="category">
+		<img src="{% static 'ocia/img/icon/Questions.png' %}" style="width:32px; height:auto; position:relative; top:-5px;"> General Questions 
+		<a class="button button-primary" href="{% url 'OCIAParticipantQuestionsUpdateView' %}">
+		<i class="fas fa-pen"></i> Edit</a>
+	<div>
+
+	<div style="height: 40px;"></div>
+	<a class="btn btn-primary" href="javascript:Logout();"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+function Logout()
+{
+	let dialog = new Dialog();
+	dialog.Launch
+	(
+		{
+			Title: 'Logout?', 
+			Icon: 'question',
+			Content: '<p>Logout now?</p>',
+			Width: 400, 
+			Height: 200,
+			Buttons:
+			[
+				{Name: 'Yes', Function: function() {
+					window.location.href = "{% url 'OCIAParticipantLogoutView' %}"
+				}
+				},
+				{Name: 'No', Function: dialog.Close},
+			],
+			OnClose: dialog.Close,
+		}
+	);
+}
+
+function DeleteRecord(category, name, id)
+{
+	let dialog = new Dialog();
+	dialog.Launch
+	(
+		{
+			Title: 'Delete?', 
+			Icon: 'question',
+			Content: `<p>Delete ${category} <strong>${name}</strong> record? <strong>WARNING</strong>: This action cannot be undone.</p>`,
+			Width: 500, 
+			Height: 250,
+			Buttons:
+			[
+				{Name: 'Yes', Function: function() {
+					dialog.Close;
+					window.location.href = `{% url 'OCIAParticipantDeleteRecordNoArgView' %}/${category}/${id}`
+				}
+				},
+				{Name: 'No', Function: dialog.Close},
+			],
+			OnClose: dialog.Close,
+		}
+	);
+
+}
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "maven/base.html" %}
+{% load assets %}
+{% load maven %}
+
+{% block cssfile %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static_reload 'main/site/vendor/dialog/dialog.css' %}">
+<link rel="stylesheet" type="text/css" href="{% maven_theme_css %}">
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'admin/js/jquery.init.js' %}"></script>
+<script>var $ = django.jQuery;</script>
+<script>var SITE_DEBUG = {% site_debug %};</script>
+<script>var HTTP_STATIC_URL = "{% http_static_url %}";</script>
+<script>var HTTP_MEDIA_URL = "{% http_media_url %}";</script>
+<script src="{% static 'main/site/vendor/fontawesome/all.js' %}"></script>
+<script src="{% static_reload 'main/site/vendor/dialog/dialog.js' %}"></script>
+<script src="{% static_reload 'maven/maven-1.3.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+{% include "maven/component/explorer.html" %}
+{% endblock %}
+
+{% block jsfile %}
+{{ block.super }}
+{% endblock %}
+
+{% block script %}
+{{ block.super }}
+{% include "maven/component/script-explorer.html" %}
+{% endblock %}
+

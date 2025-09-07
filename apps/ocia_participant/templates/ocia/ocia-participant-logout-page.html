@@ -1,0 +1,14 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Logout</h2>
+<p>You have been successfully logged out.</p>
+<p>Click <strong>Login</strong> to add a new user or log back into the system.<p>
+<div class="spacer"></div>          
+<a class="btn btn-primary" href="{% url 'OCIAParticipantLoginView' %}"><i class="fas fa-unlock"></i> Login</a>
+{% endblock %}
+
+{% block form-logic %}
+{% endblock %}

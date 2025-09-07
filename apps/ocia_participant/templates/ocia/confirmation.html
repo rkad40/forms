@@ -1,0 +1,9 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>Submission Complete</h2>
+<p>Thank you! Your OCIA participant information has been saved.</p>
+<a href="{% url 'OCIAParticipantCreateView' %}">Start New Entry</a>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% load maven %}
+<div id="maven-{{ widget.name }}-widget" class="maven-standard-widget">
+	<div class="maven-image" onclick="new MavenFileSelector('{{ widget.name }}', '{{ widget.url }}', 'image')" style="display: inline-block; width: 100px; height: 80px; background-color: #aaa; blox-sizing: border-box; overflow: hidden;">
+		{% if widget.value != None %}
+		<img src="{% maven_media_crop widget.value '100x80' %}" style="width: 100px; height: 80px; blox-sizing: border-box; overflow: hidden;">
+		{% endif %}
+	</div>
+	<div style="height: 1px;"></div>
+	<div class="maven-input-panel">
+		<input type="hidden" id="id_{{ widget.name }}" name="{{ widget.name }}" class="maven-input form-control"{% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+		<input type="text" id="id_{{ widget.name }}-maven-mirror" name="{{ widget.name }}-maven-mirror" class="maven-mirror form-control"{% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}" {% endif %} disabled>
+	</div>
+	<div class="button-panel">
+		<a class="maven-button" href="javascript:mavenFileSelectorWidgetSet('{{ widget.name }}', '{{ widget.url }}', 'image')">
+			<i class="fas fa-folder"></i><div style="display: inline-block;">&nbsp;Browse</div>
+		</a>
+		<div style="display: inline-block; width: 2px;"></div>
+		<a class="maven-button" href="javascript:mavenFileSelectorWidgetClear('{{ widget.name }}', 'image')">
+			<i class="fas fa-backspace"></i><div style="display: inline-block;">&nbsp;Clear</div>
+		</a>
+	</div>
+</div>
+{% include 'maven/component/script-vars.html' %}
+

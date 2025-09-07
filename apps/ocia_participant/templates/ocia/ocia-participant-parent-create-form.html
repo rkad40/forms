@@ -1,0 +1,26 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Parent Info</h2>
+<form method="post">
+  {% csrf_token %}
+  {% include "ocia/progress.html" with node_index=3 %}
+  {% include "main/form.html" %}
+  <div class="spacer"></div>  
+  {% if parent_count == 1%}
+  <div class="header">Continue...</div>
+  <div class="help">Continue by clicking <strong>Next</strong>:</div>
+  <button type="submit" name="next"><i class="fas fa-arrow-right"></i> Next</button>
+  {% else %}
+  <div class="header">Another Parent...</div>
+  <div class="help">Have you entered data for both of your parents (both your mother and father)? If not, click <strong>Add</strong>:</div>
+  <button type="submit" name="add_another"><i class="fas fa-plus"></i> Add</button>
+  <div class="spacer"></div>
+  <div class="header">...No, All Done!</div>
+  <div class="help">If you have recorded all of your parents' info, please click <strong>Next</strong> to continue:</div>
+  <button type="submit" name="next"><i class="fas fa-arrow-right"></i> Next</button>
+  {% endif %}
+</form>
+{% endblock %}

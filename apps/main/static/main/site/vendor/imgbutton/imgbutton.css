@@ -1,0 +1,100 @@
+.ImageButtonWrapper
+{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-content: stretch;
+	box-sizing: border-box;
+}
+
+.ImageButtonEmpty
+{
+	height: 1p;
+	width: 200px;
+	max-width: 50%;
+	box-sizing: border-box;
+	flex-grow: 1;
+}
+
+.ImageButton
+{
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	border: 1px solid #ffffff;
+	width: 200px;
+	max-width: 50%;
+	box-sizing: border-box;
+	flex-grow: 1;
+	border: 1px solid transparent;
+	overflow: hidden;
+
+}
+
+.ImageButton.active
+{
+	border: 1px solid transparent;
+}
+
+.ImageButton img
+{
+	width: 100%;
+	height: 100%;
+	filter: grayscale(20%);
+	transition: all 0.35s ease;	
+	box-sizing: border-box;
+	-webkit-transition: all .5s ease;
+	-moz-transition: all .5s ease;
+	-ms-transition: all .5s ease;
+	-o-transition: all .5s ease;
+	transition: all .5s ease;
+	vertical-align: middle;
+}
+
+.ImageButton.active img
+{
+	filter: grayscale(0%);
+	-webkit-transform:scale(1.05); /* Safari and Chrome */
+	-moz-transform:scale(1.05); /* Firefox */
+	-ms-transform:scale(1.05); /* IE 9 */
+	-o-transform:scale(1.05); /* Opera */
+	transform:scale(1.05);  
+}
+
+.ImageButton > div
+{
+	position: absolute;
+	background-color: #000000;
+	height: 30px;
+	width: 100%;
+	bottom: 0;
+	opacity: 0.8;
+	padding: 5px;
+	transition: all 0.35s ease;
+	overflow-y: hidden;
+	box-sizing: border-box;	
+}
+
+.ImageButton.active > div
+{
+	height: 85px;
+}
+
+.ImageButton > div > h1
+{
+	font-weight: bold;
+	font-size: 16px;
+	color: #ffffff;
+	position: relative;
+	top: 0px;
+}
+
+.ImageButton > div > p
+{
+	font-size: 12px;
+	line-height: 14px;
+	color: #ffffff;
+	position: relative;
+	top: 0px;
+}

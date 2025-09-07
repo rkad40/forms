@@ -1,0 +1,14 @@
+{% load static %}
+{% load assets %}
+{% for field in form %}
+  <div id="id_wrapper_{{ field.name }}" class="field-wrapper">
+	<div class="header">{{ field.label }}</div>
+	{% if field.help_text %}<div class="help">{{ field.help_text|safe }}</div>{% endif %}
+	<div>
+	{{ field }}
+	</div>
+	{% for error in field.errors %}
+	  <div class="error">{{ error|safe }}</div>
+	{% endfor %}
+  </div>
+{% endfor %}

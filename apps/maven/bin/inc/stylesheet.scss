@@ -1,0 +1,1191 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//  __  __                         ____  _         _
+// |  \/  | __ ___   _____ _ __   / ___|| |_ _   _| | ___  ___
+// | |\/| |/ _` \ \ / / _ \ '_ \  \___ \| __| | | | |/ _ \/ __|
+// | |  | | (_| |\ V /  __/ | | |  ___) | |_| |_| | |  __/\__ \
+// |_|  |_|\__,_| \_/ \___|_| |_| |____/ \__|\__, |_|\___||___/
+//                                           |___/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+.maven-wrapper {
+    background-color: $base-bg-color;
+    min-height: 100px;
+    box-sizing: border-box;
+    font-family: $base-font-family;
+    padding: $general-padding;
+}
+
+.maven-admin {
+
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+
+    .maven-admin-header {
+        height: 49px; 
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+        border: 0px;
+        box-sizing: border-box;
+    }
+	table.maven-admin-header {
+		box-sizing: border-box;
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+        border: 0px;
+		border-collapse: collapse !important;
+	}
+    .maven-admin-header td {
+        background-color: $admin-bg-color;
+        vertical-align: middle;
+        margin: 0px;
+        padding: 0px;
+        border: 0px;
+		border-collapse: collapse;
+    }
+    .maven-admin-header .maven-admin-title img {
+        position: relative;
+        top: -2px;
+    }
+    .maven-admin-header .maven-admin-title {
+        font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif; 
+        color: $admin-font-color;
+        font-weight: 100 !important;
+        font-size: 24px;
+        padding: 5px 10px;
+        text-align: left;
+    }
+    .maven-admin-header .maven-admin-subtitle {
+        color: $admin-font-color;
+    }
+    .maven-admin-header .maven-admin-links {
+        font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif; 
+        color: #ccc;
+        font-weight: 100 !important;
+        font-size: 12px;
+        padding: 14px 10px;
+        text-align: right
+    }
+    .maven-admin-header .maven-admin-links a:visited, 
+    .maven-admin-header .maven-admin-links a:active, 
+    .maven-admin-header .maven-admin-links a:link {
+        color: #ccc; 
+        text-decoration: none;
+    } 
+    .maven-admin-header .maven-admin-links a:hover {
+        cursor: hover;
+        text-decoration: none;
+        color: #fff;
+    }     
+}
+
+.maven-wrapper {
+
+    .no-select {
+        text-decoration: none;
+        -webkit-touch-callout: none; /* iOS Safari */
+          -webkit-user-select: none; /* Safari */
+           -khtml-user-select: none; /* Konqueror HTML */
+             -moz-user-select: none; /* Old versions of Firefox */
+              -ms-user-select: none; /* Internet Explorer/Edge */
+                  user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome, Edge, Opera and Firefox */
+    }
+    
+    .no-select-text {
+        white-space: nowrap;
+        overflow: hidden;
+        // text-overflow: ellipsis;        
+        -webkit-touch-callout: none; /* iOS Safari */
+          -webkit-user-select: none; /* Safari */
+           -khtml-user-select: none; /* Konqueror HTML */
+             -moz-user-select: none; /* Old versions of Firefox */
+              -ms-user-select: none; /* Internet Explorer/Edge */
+                  user-select: none; /* Non-prefixed version, currently
+                                        supported by Chrome, Edge, Opera and Firefox */
+    }
+
+    .main-gutter {
+        background-color: $base-bg-color;
+        height: $gutter-size;
+    }
+
+    .button-bar {
+        border: $field-border;
+        color: $base-font-color;
+        padding: 0;
+		height: 135px;
+    }
+
+    .main-content {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: stretch;
+        align-content: flex-start;
+    }
+
+    $crumb-height: $font-size-sm + 3*$general-padding;
+
+    .crumbs-wrapper {
+
+        border: $field-border;
+        color: $field-font-color;
+        margin: 0;
+        height: $crumb-height;
+
+        .crumbs {
+
+            background-color: $field-bg-color;
+            padding: 0; margin: 0;
+            height: $crumb-height;
+            padding-left: 1px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            table {
+                height: $crumb-height;
+                border-collapse: collapse;
+            }
+            table td {
+                padding: 0 3px;
+                height: $crumb-height;
+                font-size: 14px;
+                line-height: 18px;
+                color: shade($field-font-color, 30%);
+                border-collapse: collapse;
+                vertical-align: middle;
+            }
+            table td.crumb-button.crumb-image {
+                padding-left: 3px;
+                padding-right: 3px;
+            }
+            table td:nth-of-type(2) {
+                padding-left: 7px;
+            }
+            table td.crumb-button.crumb-image img {
+                vertical-align: middle;
+            }
+            table td.crumb-button:hover {
+                background-color: darken($field-bg-color, 20%);
+                cursor: pointer;
+                vertical-align: center;
+                color: $field-font-color;
+            }
+        }
+    }
+
+    img {
+        vertical-align: middle;
+    }
+
+    .footer {
+        border: $field-border;
+        color: $base-font-color;
+        height: 30px;
+        min-height: 30px;
+        max-height: 30px;
+        padding: $general-padding;
+        padding-top: 7px;
+		box-sizing: border-box;
+        .text {
+            font-size: $font-size-md;
+            font-weight: 400;
+        }
+    }
+
+    .dir-label, .file-label {
+        display: inline-block;
+        color: $list-label-font-color;
+        padding: 0px $general-padding;
+        background-color: $list-label-bg-color;
+        height: $font-size-md*2;
+		overflow: hidden;
+		box-sizing: border-box;
+        .text {
+            font-size: $font-size-md;
+			line-height: $font-size-md*1.2;
+			position: relative;
+			top: 5px;
+        }
+    }
+
+    .dir-list, .file-list {
+        display: inline-block;
+        background-color: $field-bg-color;
+		box-sizing: border-box;
+    }
+
+    .dir-list {
+        min-height: 100px;
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 0;
+        margin: 0;
+		box-sizing: border-box;
+    }
+
+    .file-list {
+        min-height: $file-list-height + 136;
+        max-height: $file-list-height + 136;
+        height: $file-list-height + 136;
+        overflow-x: auto;
+        overflow-y: auto;
+		box-sizing: border-box;
+    }
+
+    .general-label {
+        display: block;
+        color: $list-label-font-color;
+        padding: $general-padding;
+        background-color: $list-label-bg-color;
+        font-size: $font-size-md;
+        height: $font-size-md*2;
+        line-height: $font-size-md*1.2;
+		box-sizing: border-box;
+    }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//     _                           ____                             _____ _ _
+//    | |    __ _ _ __ __ _  ___  / ___|  ___ _ __ ___  ___ _ __   |  ___(_) | ___
+//    | |   / _` | '__/ _` |/ _ \ \___ \ / __| '__/ _ \/ _ \ '_ \  | |_  | | |/ _ \
+//    | |__| (_| | | | (_| |  __/  ___) | (__| | |  __/  __/ | | | |  _| | | |  __/
+//    |_____\__,_|_|  \__, |\___| |____/ \___|_|  \___|\___|_| |_| |_|   |_|_|\___|
+//                    |___/
+//        __  ____  _        _     _     _
+//       / / |  _ \(_)_ __  | |   (_)___| |_ ___
+//      / /  | | | | | '__| | |   | / __| __/ __|
+//     / /   | |_| | | |    | |___| \__ \ |_\__ \
+//    /_/    |____/|_|_|    |_____|_|___/\__|___/
+//    
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    .dir-label {
+        order: 1;
+        flex-basis: 30%;
+        border: 0;
+    }
+    
+    .gutter-1 {
+        order: 2;
+        width: $gutter-size;
+        background-color: $base-bg-color;
+    }
+    
+    .file-label {
+        order: 3;
+        flex-basis: 60%;
+        flex-grow: 1;
+        border: 0;
+    }
+
+    .dir-list {
+        order: 3;
+        flex-basis: 30%;
+        border: 0;
+    }
+
+    .gutter-2 {
+        order: 4;
+        width: $gutter-size;
+        background-color: $base-bg-color;
+    }
+    
+    .file-list {
+        order: 5;
+        flex-basis: 60%;
+        flex-grow: 1;
+        border: 0;
+    }
+    
+    .carriage-return {
+        display: none;
+        flex-basis: 100%;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//  ____                  _ _   ____                             _____ _ _
+// / ___| _ __ ___   __ _| | | / ___|  ___ _ __ ___  ___ _ __   |  ___(_) | ___
+// \___ \| '_ ` _ \ / _` | | | \___ \ / __| '__/ _ \/ _ \ '_ \  | |_  | | |/ _ \
+//  ___) | | | | | | (_| | | |  ___) | (__| | |  __/  __/ | | | |  _| | | |  __/
+// |____/|_| |_| |_|\__,_|_|_| |____/ \___|_|  \___|\___|_| |_| |_|   |_|_|\___|
+// 
+//     __  ____  _        _     _     _
+//    / / |  _ \(_)_ __  | |   (_)___| |_ ___
+//   / /  | | | | | '__| | |   | / __| __/ __|
+//  / /   | |_| | | |    | |___| \__ \ |_\__ \
+// /_/    |____/|_|_|    |_____|_|___/\__|___/
+//
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    @media only screen and (max-width: 800px) {
+        .dir-label {
+            order: 1;
+            flex-basis: 100%;
+            border: 0;
+        }
+
+        .dir-list {
+            order: 2;
+            flex-basis: 100%;
+            border-right: 0;
+            max-height: 100px;
+            min-height: 100px;
+        }
+
+        .file-label {
+            order: 3;
+            flex-basis: 100%;
+            border: 0;
+            border-top: $gutter-size solid $base-bg-color;
+        }
+
+        .file-list {
+            order: 4;
+            flex-basis: 100%;
+            border: 0;
+            min-height: $file-list-height;
+            max-height: $file-list-height;
+            height: $file-list-height;
+        }
+
+        .gutter-1, .gutter-2 {
+            display: none;
+        }
+
+        .carriage-return {
+            display: none;
+        }
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//     _____ _ _        _____       _
+//    |  ___(_) | ___  | ____|_ __ | |_ _ __ _   _
+//    | |_  | | |/ _ \ |  _| | '_ \| __| '__| | | |
+//    |  _| | | |  __/ | |___| | | | |_| |  | |_| |
+//    |_|   |_|_|\___| |_____|_| |_|\__|_|   \__, |
+//                                           |___/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    .file-entry {
+        background-color: darken($field-bg-color, 10%);
+        border: $list-entry-border-size solid $field-bg-color;
+        width: 100%;
+        vertical-align: middle;
+		box-sizing: border-box;
+    }
+
+    .file-entry table {
+        width: 100%;
+        border-collapse: collapse;
+        padding: 0;
+        height: $file-entry-img-lg-height + 2*$list-entry-margin;
+        vertical-align: middle;
+        td {
+            padding: 0;
+            vertical-align: middle;
+        }
+        td.indicator {
+            width: 9px; 
+            min-width: 9px; 
+            max-width: 9px;
+            text-align: center;
+        }
+        td.icon {
+            background-color: darken($field-bg-color, 10%);
+            height: $file-entry-img-lg-height + 2*$list-entry-margin;
+            width: $file-entry-img-lg-width + 2*$list-entry-margin;
+            max-width: $file-entry-img-lg-width + 2*$list-entry-margin;
+            padding-left: $list-entry-margin;
+        }
+        td.icon img {
+            height: $file-entry-img-lg-height;
+            width: $file-entry-img-lg-width;
+        }
+        td.file-info {
+            padding: 0px;
+            background-color: darken($field-bg-color, 10%);
+            color: shade($field-font-color, 25%);
+            .filename {
+				@if $theme == 'light' {
+                font-weight: 700;
+				}
+				@else {
+                font-weight: 500;
+				}
+                font-size: min(0.4 * $file-entry-img-lg-height, $font-size-md);
+                line-height: 0.4 * $file-entry-img-lg-height;
+            }
+            .modified {
+                font-weight: 400;
+                font-size: min(0.3 * $file-entry-img-lg-height, $font-size-md);
+                line-height: 0.3 * $file-entry-img-lg-height;
+            }
+			.lock-icon {
+				color: darken($field-bg-color, 30%);
+			}
+            .size {
+                font-weight: 400;
+                font-size: min(0.3 * $file-entry-img-lg-height, $font-size-md);
+                line-height: 0.3 * $file-entry-img-lg-height;
+            }
+        }
+    }
+	
+    .file-entry table td.file-info .lock-icon {
+        color: darken($field-bg-color, 30%);
+    }
+    .file-entry.selected table td.file-info .lock-icon {
+        color: darken($selected-color, 15%);
+    }
+    .file-entry.selected:hover table td.file-info .lock-icon {
+        color: darken($selected-color, 25%);
+    }    
+
+    .file-entry.selected:hover table td.icon,
+    .file-entry.selected:hover table td.file-info,
+    .file-entry.selected:hover {
+        background-color: darken($selected-color, 10%);
+    }
+
+    .file-entry:hover table td.icon,
+    .file-entry:hover table td.file-info,
+    .file-entry:hover {
+        background-color: darken($field-bg-color, 15%);
+        cursor: pointer;
+    }
+
+    .file-entry.selected table td.icon,
+    .file-entry.selected table td.file-info,
+    .file-entry.selected {
+        background-color: $selected-color;
+    }
+
+    .file-entry .indicator {
+        width: 9px;
+        background-color: darken($field-bg-color, 20%);
+        flex-grow: 0;
+    }
+
+    .file-entry:hover .indicator {
+        background-color: darken($field-bg-color, 40%);
+    }
+
+    .file-entry.selected .indicator {
+        background-color: darken($selected-color, 15%);
+    }
+
+    .file-entry.selected:hover .indicator {
+        background-color: darken($selected-color, 25%);
+    }
+	
+	.crumb-lock {
+        color: darken($field-bg-color, 20%);
+	}
+
+    @media only screen and (max-width: 800px) {
+
+        .file-entry table {
+            height: $file-entry-img-sm-height + 2*$list-entry-margin;
+            td.icon {
+                height: $file-entry-img-sm-height + 2*$list-entry-margin;
+                width: $file-entry-img-sm-width + 2*$list-entry-margin;
+                max-width: $file-entry-img-sm-width + 2*$list-entry-margin;
+            }
+            td.icon img {
+                height: $file-entry-img-sm-height;
+                width: $file-entry-img-sm-width;
+            }
+            td.file-info {
+                .filename {
+                    font-size: 0.4 * $file-entry-img-sm-height;
+                    line-height: 0.4 * $file-entry-img-sm-height;
+                }
+                .modified {
+                    font-size: 0.3 * $file-entry-img-sm-height;
+                    line-height: 0.3 * $file-entry-img-sm-height;
+                }
+                .size {
+                    font-size: 0.3 * $file-entry-img-sm-height;
+                    line-height: 0.3 * $file-entry-img-sm-height;
+                }
+            }
+        }        
+
+    }
+
+    // }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//  ____  _        _____       _
+// |  _ \(_)_ __  | ____|_ __ | |_ _ __ _   _
+// | | | | | '__| |  _| | '_ \| __| '__| | | |
+// | |_| | | |    | |___| | | | |_| |  | |_| |
+// |____/|_|_|    |_____|_| |_|\__|_|   \__, |
+//                                      |___/
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    .dir-entry {
+        background-color: inherit;
+        margin: 2px 2px;
+        position: relative;
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: stretch;
+        box-sizing: border-box;
+
+        height: $dir-img-height + 5px;
+        line-height: $font-size-md;
+    }
+
+    .dir-entry.selected {
+        background-color: $selected-color;
+    }
+
+    .dir-entry.selected:hover {
+        background-color: darken($selected-color, 10%);
+    }
+
+    .dir-entry:hover {
+        background-color: darken($field-bg-color, 15%);
+        cursor: pointer;
+    }
+
+    .dir-entry.active {
+        background-color: darken($field-bg-color, 25%);
+    }
+
+    .dir-entry .image {
+        position: absolute;
+        top: $list-entry-margin / 2;
+        left: $list-entry-margin / 2;
+        display: inline-block;
+        height: $dir-img-height + $list-entry-margin;
+        width: $dir-img-width + $list-entry-margin;
+        flex-grow: 0;
+    }
+
+    .dir-entry .image img {
+        height: $dir-img-height;
+        width: $dir-img-width;
+        opacity: 0.9;
+        display: inline-block;
+    }
+
+    .dir-entry:hover .image img {
+        opacity: 1.0;
+    }
+
+    .dir-entry .content {
+        position: absolute;
+        top: 0px;
+        left: 24px;
+        display: inline-block;
+        flex-grow: 4;
+        margin-left: 0.5*$general-padding;
+        max-width: 50hv;
+
+        .dirname {
+            position: relative;
+            top: 6px;
+            left: $general-padding;
+            font-weight: 500;
+            font-size: $font-size-sm;
+            color: shade($field-font-color, 25%);
+        }
+    }
+
+    .dir-entry:hover .content {
+        .dirname, .modified, .size {
+            color: $field-font-color;
+        }
+    }    
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//  ____  _ _     _
+// |  _ \(_) |__ | |__   ___  _ __
+// | |_) | | '_ \| '_ \ / _ \| '_ \
+// |  _ <| | |_) | |_) | (_) | | | |
+// |_| \_\_|_.__/|_.__/ \___/|_| |_|
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+.maven-wrapper {
+
+    $tab-height: $font-size-sm*2;
+
+    .ribbon .tabs
+    {
+        background-color: $banner-background-color;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        user-select: none;	
+        width: 100%;
+        height: $tab-height;
+    }
+
+    .ribbon .tabs .spacer
+    {
+        width: 3px;	
+        height: $tab-height;
+    }
+
+    .ribbon .tabs .tab
+    {
+        flex-basis: fit-content;
+        cursor: pointer;
+        padding: 0px 18px;
+        background-color: $ribbon-tab-background-color-inactive;
+        border-radius: $ribbon-tab-border-radius $ribbon-tab-border-radius 0px 0px;
+        border-top: 1px solid $ribbon-tab-border-color-inactive;
+        border-left: 1px solid $ribbon-tab-border-color-inactive;
+        border-right: 1px solid $ribbon-tab-border-color-inactive;
+        border-bottom: 1px solid $ribbon-tab-border-color-inactive;
+        color: $ribbon-tab-text-color-inactive;
+        user-select: none;	
+        font-size: $font-size-sm;
+        height: $tab-height - 2px;
+        line-height: $tab-height - $font-size-sm/4;
+        text-size-adjust: 100%;
+		overlfow: hidden;
+    }
+
+    .ribbon .tabs .tab.active
+    {
+        background-color: $ribbon-tab-background-color-active;
+        border-top: 1px solid $ribbon-tab-border-color-active;
+        border-left: 1px solid $ribbon-tab-border-color-active;
+        border-right: 1px solid $ribbon-tab-border-color-active;
+        border-bottom: 1px solid $ribbon-tab-border-color-active;
+        color: $ribbon-tab-text-color-active;
+    }
+
+    .ribbon .tabs .tab:hover
+    {
+        background-color: $ribbon-tab-background-color-inactive-hover;
+        border-top: 1px solid $ribbon-tab-border-color-inactive-hover;
+        border-left: 1px solid $ribbon-tab-border-color-inactive-hover;
+        border-right: 1px solid $ribbon-tab-border-color-inactive-hover;
+        border-bottom: 1px solid transparent;
+        color: $ribbon-tab-text-color-inactive-hover;	
+    }
+
+    .ribbon .tabs .tab.active:hover
+    {
+        background-color: $ribbon-tab-background-color-active-hover;
+        border-top: 1px solid $ribbon-tab-border-color-active;
+        border-left: 1px solid $ribbon-tab-border-color-active;
+        border-right: 1px solid $ribbon-tab-border-color-active;
+        border-bottom: 1px solid transparent;
+        color: $ribbon-tab-text-color-active-hover;	
+    }
+
+    $ribbon-padding: 4px;
+    $ribbon-large-button-height: 75px;
+    $ribbon-small-button-height: $ribbon-large-button-height / 3;
+
+    .ribbon .ribbon-menus, 
+    .ribbon .ribbon-menus .ribbon-menu,
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups
+    {
+        background-color: $ribbon-background-color;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
+    .ribbon .ribbon-menus .top-border
+    {
+        border: $debug-border-width solid $debug-border-color;
+        height: $ribbon-padding;
+    }
+
+    .ribbon .ribbon-menus .bottom-border
+    {
+        border-bottom: 1px solid $ribbon-bottom-border-color;
+        height: $ribbon-padding;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups
+    {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        padding-left: 1px;
+        width: 100%;
+        overflow-x: auto;
+        font-size: $font-size-md;
+        font-weight: 400;
+        line-height: $font-size-md * 1.5;
+        text-size-adjust: 100%;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .spacer
+    {
+        width: 1px;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .separator
+    {
+        background-color: $ribbon-separator-color;
+        width: 1px; 
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group
+    {
+        flex-basis: fit-content;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group-top
+    {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        height: $ribbon-large-button-height;		
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group-middle
+    {
+        border: $debug-border-width solid $debug-border-color;
+        height: $ribbon-padding;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group-bottom
+    {
+        text-align: center;
+        color: $ribbon-button-group-caption-text-color;
+        background-color: $ribbon-button-group-caption-background-color;
+        border: 1px solid $ribbon-button-group-caption-border-color;
+        border-radius: $ribbon-button-group-caption-border-radius;
+        user-select: none;
+        cursor: standard;
+        margin-left: 1px;
+        margin-right: 1px;
+        font-size: $font-size-xs;
+        height: $font-size-xs*1.7;
+        line-height: $font-size-xs*1.5;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .spacer
+    {
+        width: 3px;	
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button
+    {
+        min-width: 44px;
+        cursor: pointer;
+        border: 1px solid $ribbon-button-border-color;
+        background-color: $ribbon-button-background-color;
+        position: relative;
+        user-select: none;	
+        border-radius: $ribbon-button-border-radius;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button:hover
+    {
+        border: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color-hover;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button.disabled:hover
+    {
+        border: 1px solid transparent;
+        background-color: transparent;
+        cursor: default;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button:active
+    {
+        border: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color-hover;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button .image
+    {
+        position: relative;
+        top: 2px;
+        width: 100%;
+        overflow-x: hidden;
+        text-align: center;
+        height: 40px;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button.disabled .image
+    {
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button .caption
+    {
+        position: relative;
+        top: 0px;
+        width: 100%;
+        text-align: center;
+        line-height: 11px;
+        font-size: $font-size-xs;
+        color: $ribbon-button-text-color-active;
+        font-weight: 400;
+        text-size-adjust: 100%;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button.disabled .caption
+    {
+        opacity: 0.35;
+        filter: grayscale(100%);
+        color: $ribbon-button-text-color-inactive;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button .arrow
+    {
+        position: absolute;
+        bottom: 0px;
+        width: 100%;
+        overflow-x: hidden;
+        text-align: center;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button.disabled .arrow
+    {
+        opacity: 0.35;
+        filter: grayscale(100%);
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button .menu
+    {
+        min-width: 80px;
+        cursor: pointer;	
+        border: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color;
+        position: absolute;
+        display: none;
+        box-shadow: $context-menu-shadow;
+        z-index: 1000000000;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button .menu .menu-item
+    {
+        padding: 3px 10px;
+        font-size: $font-size-xs;
+        border-top: 1px solid transparent;
+        border-bottom: 1px solid transparent;
+        background-color: $ribbon-button-background-color;	
+        user-select: none;	
+        color: $ribbon-button-text-color-active;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .large-button .menu .menu-item:hover
+    {
+        border-top: 1px solid $ribbon-button-border-color-hover;
+        border-bottom: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color-hover;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster
+    {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        height: $ribbon-large-button-height;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-filler
+    {
+        flex-basis: fit-content;
+        height: $ribbon-small-button-height; 
+        border: 1px solid transparent;
+        background-color: transparent;
+        cursor: default;
+        line-height: 14px;
+        font-size: $font-size-xs;
+        user-select: none;	
+        position: relative;
+        white-space: nowrap;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button
+    {
+        flex-basis: fit-content;
+        height: $ribbon-small-button-height; 
+        border: 1px solid $ribbon-button-border-color;
+        background-color: $ribbon-button-background-color;
+        cursor: pointer;
+        line-height: $font-size-xs + 2px;
+        font-size: $font-size-xs;
+        user-select: none;	
+        border-radius: $ribbon-button-border-radius;
+        position: relative;
+        white-space: nowrap;
+        vertical-align: bottom;
+        text-size-adjust: 100%;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button:hover
+    {
+        border: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color-hover;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button.disabled:hover
+    {
+        border: 1px solid transparent;
+        background-color: transparent;
+        cursor: default;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button:active
+    {
+        border: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color-hover;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button .image
+    {
+        position: relative;
+        top: 3px;
+        left: 2px;
+        flex-basis: fit-content;
+        display: inline-block;
+        width: 20px; 
+        height: $font-size-xs * 1.5;
+        // line-height: $font-size-xs * 1.5;
+        vertical-align: middle;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button.disabled .image
+    {
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button .caption
+    {
+        flex-basis: fit-content;
+        display: inline-block;
+        padding-right: 5px;
+        padding-top: 0;
+        white-space: nowrap;
+        color: $ribbon-button-text-color-active;
+        position: relative;
+        top: $font-size-xs/4;
+        height: $font-size-xs * 1.5;
+        line-height: $font-size-xs * 1.5;
+        text-align: center;
+        vertical-align: bottom;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button.disabled .caption
+    {
+        opacity: 0.35;
+        filter: grayscale(100%);
+        color: $ribbon-button-text-color-active;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button .arrow
+    {
+        display: inline-block;	
+        position: relative;
+        top: -2px;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button.disabled .arrow
+    {
+        opacity: 0.35;
+        filter: grayscale(100%);
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button .menu
+    {
+        min-width: 80px;
+        cursor: pointer;	
+        border: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color;
+        position: absolute;
+        display: none;
+        box-shadow: $context-menu-shadow;
+        z-index: 1000000000;
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button .menu-item
+    {
+        padding: 3px 10px;
+        font-size: $font-size-xs;
+        border-top: 1px solid transparent;
+        border-bottom: 1px solid transparent;
+        background-color: $ribbon-button-background-color;	
+        user-select: none;	
+    }
+
+    .ribbon .ribbon-menus .ribbon-menu .ribbon-menu-groups .ribbon-menu-group .button-cluster .small-button .menu-item:hover
+    {
+        border-top: 1px solid $ribbon-button-border-color-hover;
+        border-bottom: 1px solid $ribbon-button-border-color-hover;
+        background-color: $ribbon-button-background-color-hover;
+    }
+
+}
+
+$border-color-1: shade($base-bg-color, 10%);
+.maven-dir-selector .maven-wrapper {
+    background-color: transparent;
+    .gutter-3 {
+        background-color: transparent;
+        height: $gutter-size*2;
+    }
+    .section {
+        border: 1px solid $border-color-1;
+    }
+    .dir-select-list {
+        box-sizing: border-box;
+        background-color: $field-bg-color;
+        overflow: auto;
+        height: 235px;
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.maven-file-selector .maven-wrapper {
+    background-color: transparent;
+
+    .gutter-3 {
+        background-color: transparent;
+        height: $gutter-size*2;
+    }
+    .section {
+        border: 1px solid $border-color-1;
+    }
+    .select-list-wrapper, .file-select-list, .dir-select-list {
+        box-sizing: border-box;
+        background-color: $field-bg-color;
+        overflow: auto;
+        height: 235px;
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 0;
+        margin: 0;
+        display: block;
+    }
+
+    .file-select-list, .dir-select-list {
+        padding-top: 1px;
+        display: none;
+    }
+    .file-select-list.active, .dir-select-list.active {
+        display: block;
+    }
+
+    $inactive-tab-bg-color: shade($list-label-bg-color, 10%);
+    $inactive-tab-fg-color: contrast($inactive-tab-bg-color, 40%);
+    $inactive-tab-bg-color-hover: shade($list-label-bg-color, 15%);
+    $inactive-tab-fg-color-hover: contrast($inactive-tab-bg-color, 20%);
+    $active-tab-bg-color: $field-bg-color;
+    $active-tab-fg-color: $field-font-color;
+
+    .tab-label {
+        padding: 5px 3px 3px 3px;
+        background-color: $list-label-bg-color;
+        height: $font-size-md + 5px + 5px + 0px + 5px;
+    }
+
+    .view-tab {
+        min-width: 100px;
+        // max-width: 40%;
+        font-size: $font-size-md;
+        line-height: $font-size-md;
+        display: inline-block; 
+        padding: 5px 15px 5px 15px;
+        height: $font-size-md + 5px + 5px;
+        background-color: $inactive-tab-bg-color;
+        color: $inactive-tab-fg-color;
+        cursor: pointer;
+        text-align: center;
+    }
+    .view-tab:hover {
+        background-color: $inactive-tab-bg-color-hover;
+        color: $inactive-tab-fg-color-hover;
+    }
+    .view-tab.active {
+        background-color: $field-bg-color;
+        color: black;
+    }
+
+}
+
+.maven-image-selector-widget {
+    .maven-image {
+        width: $file-entry-img-xl-width + 4px;
+        height: $file-entry-img-xl-height + 4px;
+        background-color: #aaa;
+        border: 2px solid #666;
+        margin: 5px 0;
+        cursor: pointer;
+    }
+}
+
+.maven-upload-input .btn.btn-primary {
+  padding: 4px 12px 4px 12px;
+  margin: 0;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  line-height: 24px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  background-color: #ddd;
+  color: #333;
+  border: 1px solid #999;
+  height: 35px;
+  user-select: none;
+  -webkit-user-drag: none;
+  border-radius: 0;
+  vertical-align: text-bottom;
+  box-sizing: border-box;
+  text-size-adjust: 100%;
+}
+
+.maven-upload-input .btn.btn-primary:hover {
+  background-color: #ccc;
+  color: #333;
+  border: 1px solid #666;
+}
+
+.maven-upload-input .btn.btn-primary:active {
+  color: #333;
+}
+
+.maven-admin-widget {
+	margin-left: 170px;
+	width: 500px; 
+	max-width: 100%;
+	input {
+		width: 280px; 
+		max-width: 95%;
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.maven-admin-widget {
+		width: 100%;
+		max-width: 100%;
+		margin-left: 0px;
+		input {
+			width: 100%;
+			max-width: 100%;
+		}
+	}
+}
+
+.maven-standard-widget {
+	margin-left: 0px;
+}
+

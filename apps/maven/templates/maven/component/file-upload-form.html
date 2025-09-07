@@ -1,0 +1,347 @@
+<style>
+	.maven-upload-dragndrop,
+	.maven-upload-uploading,
+	.maven-upload-success,
+	.maven-upload-error {
+		display: none;
+	}
+
+	.maven-upload {
+		/* font-size: 1.25rem; */
+		/* 20 */
+		background-color: #c8dadf;
+		position: relative;
+		padding: 50px 20px;
+	}
+
+	.maven-upload.has-advanced-upload {
+		outline: 2px dashed #92b0b3;
+		outline-offset: -10px;
+
+		-webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
+		transition: outline-offset .15s ease-in-out, background-color .15s linear;
+	}
+
+	.maven-upload.is-dragover {
+		outline-offset: -20px;
+		outline-color: #c8dadf;
+		background-color: #fff;
+	}
+
+	.maven-upload-dragndrop,
+	.maven-upload-icon {
+		display: none;
+	}
+
+	.maven-upload.has-advanced-upload .maven-upload-dragndrop {
+		display: inline;
+	}
+
+	.maven-upload.has-advanced-upload .maven-upload-icon {
+		width: 100%;
+		height: 80px;
+		fill: #92b0b3;
+		display: block;
+		margin-bottom: 40px;
+	}
+
+	.maven-upload.is-uploading .maven-upload-input,
+	.maven-upload.is-success .maven-upload-input,
+	.maven-upload.is-error .maven-upload-input {
+		visibility: hidden;
+	}
+
+	.maven-upload-uploading,
+	.maven-upload-success,
+	.maven-upload-error {
+		display: none;
+	}
+
+	.maven-upload.is-uploading .maven-upload-uploading,
+	.maven-upload.is-success .maven-upload-success,
+	.maven-upload.is-error .maven-upload-error {
+		display: block;
+		text-align: center;
+		position: absolute;
+		top: 150px;
+		left: 0;
+		right: 0;
+		width: 100%;
+		text-align: center;
+		/* position: absolute;
+		top: 50%;
+		right: 0;
+		left: 0;
+
+		-webkit-transform: translateY(-50%);
+		transform: translateY(-50%); */
+	}
+
+	.maven-upload-uploading {
+		font-style: italic;
+	}
+
+	.maven-upload-success {
+		-webkit-animation: appear-from-inside .25s ease-in-out;
+		animation: appear-from-inside .25s ease-in-out;
+	}
+
+	@-webkit-keyframes appear-from-inside {
+		from {
+			-webkit-transform: translateY(-50%) scale(0);
+		}
+
+		75% {
+			-webkit-transform: translateY(-50%) scale(1.1);
+		}
+
+		to {
+			-webkit-transform: translateY(-50%) scale(1);
+		}
+	}
+
+	@keyframes appear-from-inside {
+		from {
+			transform: translateY(-50%) scale(0);
+		}
+
+		75% {
+			transform: translateY(-50%) scale(1.1);
+		}
+
+		to {
+			transform: translateY(-50%) scale(1);
+		}
+	}
+
+	.maven-upload-restart {
+		font-weight: 700;
+	}
+
+	.maven-upload-restart:focus,
+	.maven-upload-restart:hover {
+		color: #39bfd3;
+	}
+
+	.js .maven-upload-file {
+		width: 0.1px;
+		height: 0.1px;
+		opacity: 0;
+		overflow: hidden;
+		position: absolute;
+		z-index: -1;
+	}
+
+	.js .maven-upload-file+label {
+		max-width: 80%;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		cursor: pointer;
+		display: inline-block;
+		overflow: hidden;
+	}
+
+	.js .maven-upload-file+label:hover strong,
+	.maven-upload-file:focus+label strong,
+	.maven-upload-file.has-focus+label strong {
+		color: #39bfd3;
+	}
+
+	.js .maven-upload-file:focus+label,
+	.js .maven-upload-file.has-focus+label {
+		outline: 1px dotted #000;
+		outline: -webkit-focus-ring-color auto 5px;
+	}
+
+	.js .maven-upload-file+label * {
+		/* pointer-events: none; */
+		/* in case of FastClick lib use */
+	}
+
+	.no-js .maven-upload-file+label {
+		display: none;
+	}
+
+	.no-js .maven-upload-button {
+		display: block;
+	}
+
+	.maven-upload-button {
+		font-weight: 700;
+		color: #e5edf1;
+		background-color: #39bfd3;
+		display: block;
+		padding: 8px 16px;
+		margin: 40px auto 0;
+	}
+
+	.maven-upload-button:hover,
+	.maven-upload-button:focus {
+		background-color: #0f3c4b;
+	}
+
+	.maven-upload-choose_a_file:hover {
+		cursor: pointer;
+		/* color: #0f3c4b */
+		color: #0c6583;
+		text-decoration: underline;
+	}
+</style>
+
+<form method="post" action="" enctype="multipart/form-data" novalidate class="maven-upload">
+	<div class="maven-upload-input">
+		<div style="font-size: 100px; text-align: center; color: #92b0b3;"><i class="fas fa-cloud-upload-alt"></i></div>
+		<div style="height: 20px;"></div>
+		<label for="id-maven-upload-files" style="display: block; text-align: center;"><strong class="maven-upload-choose_a_file">Choose files</strong><span class="maven-upload-dragndrop"> or drag-and-drop here</span>.</label>
+		<input type="file" name="maven-upload-files" id="id-maven-upload-files" style="position: absolute; left: -1000px; width: 100%; border: 1px solid #92b0b3; padding: 3px; border-radius: 3px;" class="maven-upload-file" data-multiple-caption="{count} files selected" multiple />
+		<div style="height: 40px;"></div>
+		<div style="text-align: center;">
+		<button type="submit" class="btn btn-primary">Upload</button>
+		</div>
+	</div>
+	<div class="maven-upload-uploading"><i class="fas fa-spinner fa-spin"></i> Uploading &hellip;</div>
+	<div class="maven-upload-success"><i class="fas fa-spinner fa-thumbs-up"></i> Done! <a href="#" class="maven-upload-restart" role="button">Upload more?</a></div>
+	<div class="maven-upload-error"><i class="fas fa-spinner fa-exclamation-circle"></i>Error! <span></span>. <a href="#" class="maven-upload-restart" role="button">Try again?</a></div>
+</form>
+
+<script>
+	'use strict';
+
+	(function (document, window, index) {
+		// feature detection for drag&drop upload
+		var isAdvancedUpload = function () {
+			var div = document.createElement('div');
+			return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window &&
+				'FileReader' in window;
+		}();
+
+
+		// applying the effect for every form
+		var forms = document.querySelectorAll('.maven-upload');
+		Array.prototype.forEach.call(forms, function (form) {
+			var input = form.querySelector('input[type="file"]'),
+				label = form.querySelector('label'),
+				errorMsg = form.querySelector('.maven-upload-error span'),
+				restart = form.querySelectorAll('.maven-upload-restart'),
+				droppedFiles = false,
+				showFiles = function (files) {
+					label.textContent = files.length > 1 ? (input.getAttribute('data-multiple-caption') || '')
+						.replace('{count}', files.length) : files[0].name;
+				},
+				triggerFormSubmit = function () {
+					var event = document.createEvent('HTMLEvents');
+					event.initEvent('submit', true, false);
+					form.dispatchEvent(event);
+				};
+
+			// letting the server side to know we are going to make an Ajax request
+			var ajaxFlag = document.createElement('input');
+			ajaxFlag.setAttribute('type', 'hidden');
+			ajaxFlag.setAttribute('name', 'ajax');
+			ajaxFlag.setAttribute('value', 1);
+			form.appendChild(ajaxFlag);
+
+			// automatically submit the form on file select
+			input.addEventListener('change', function (e) {
+				showFiles(e.target.files);
+			});
+
+			// drag&drop files if the feature is available
+			if (isAdvancedUpload) {
+				form.classList.add(
+					'has-advanced-upload'
+				); // letting the CSS part to know drag&drop is supported by the browser
+
+				['drag', 'dragstart', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach(
+					function (event) {
+						form.addEventListener(event, function (e) {
+							// preventing the unwanted behaviours
+							e.preventDefault();
+							e.stopPropagation();
+						});
+					});
+				['dragover', 'dragenter'].forEach(function (event) {
+					form.addEventListener(event, function () {
+						form.classList.add('is-dragover');
+					});
+				});
+				['dragleave', 'dragend', 'drop'].forEach(function (event) {
+					form.addEventListener(event, function () {
+						form.classList.remove('is-dragover');
+					});
+				});
+				form.addEventListener('drop', function (e) {
+					droppedFiles = e.dataTransfer.files; // the files that were dropped
+					showFiles(droppedFiles);
+
+				});
+			}
+
+
+			// if the form was submitted
+			form.addEventListener('submit', function (e) {
+				// preventing the duplicate submissions if the current one is in progress
+				if (form.classList.contains('is-uploading')) return false;
+
+				form.classList.add('is-uploading');
+				form.classList.remove('is-error');
+
+				if (isAdvancedUpload) // ajax file upload for modern browsers
+				{
+					e.preventDefault();
+
+					// gathering the form data
+					var ajaxData = new FormData(form);
+					if (droppedFiles) {
+						Array.prototype.forEach.call(droppedFiles, function (file) {
+							ajaxData.append(input.getAttribute('name'), file);
+						});
+					}
+
+					mavenFileUpload("{{ id }}", ajaxData);
+				} 
+				else // fallback Ajax solution upload for older browsers
+				{
+					var iframeName = 'uploadiframe' + new Date().getTime(),
+						iframe = document.createElement('iframe');
+
+					$iframe = $('<iframe name="' + iframeName + '" style="display: none;"></iframe>');
+
+					iframe.setAttribute('name', iframeName);
+					iframe.style.display = 'none';
+
+					document.body.appendChild(iframe);
+					form.setAttribute('target', iframeName);
+
+					iframe.addEventListener('load', function () {
+						var data = JSON.parse(iframe.contentDocument.body.innerHTML);
+						form.classList.remove('is-uploading')
+						form.classList.add(data.success == true ? 'is-success' : 'is-error')
+						form.removeAttribute('target');
+						if (!data.success) errorMsg.textContent = data.error;
+						iframe.parentNode.removeChild(iframe);
+					});
+				}
+			});
+
+
+			// restart the form if has a state of error/success
+			Array.prototype.forEach.call(restart, function (entry) {
+				entry.addEventListener('click', function (e) {
+					e.preventDefault();
+					form.classList.remove('is-error', 'is-success');
+					input.click();
+				});
+			});
+
+			// Firefox focus bug fix for file input
+			input.addEventListener('focus', function () {
+				input.classList.add('has-focus');
+			});
+			input.addEventListener('blur', function () {
+				input.classList.remove('has-focus');
+			});
+
+		});
+	}(document, window, 0));
+</script>

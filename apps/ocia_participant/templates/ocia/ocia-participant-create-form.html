@@ -1,0 +1,29 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load assets %}
+
+{% block content %}
+<h2>OCIA Participant - Personal Info</h2>
+<form method="post">
+  {% csrf_token %}
+  {% include "ocia/progress.html" with node_index=0 %}
+  {% include "main/form.html "%}
+  <div class="spacer"></div>
+  <div class="header">Continue...</div>
+  <div class="help">Please click <strong>Next</strong> to continue on to the next form.</div>
+  <div class="spacer"></div>
+  <button type="submit"><i class="fas fa-arrow-right"></i> Next</button>
+</form>
+{% endblock %}
+
+{% block form-logic %}
+	if (me.getValue("marital_status") == "married") 
+	{
+    me.setValue("engaged", "no")
+		me.hide("engaged");
+	}
+	if (me.getValue("marital_status") == "single") 
+	{
+		me.show("engaged");
+	}
+{% endblock %}

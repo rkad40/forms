@@ -1,0 +1,20 @@
+{% load static %}
+{% load assets %}
+
+<script>
+function teamLogout() {
+	let d = new Dialog();
+	d.Launch({
+		Title: 'Log out?',
+		Icon: 'question',
+		Content: '<p>You are currently logged on as team <strong>{{ request.session.team.name }}</strong> (players {{ request.session.team.players }}).</p><p>Log out now?</p>',
+		Buttons: [
+			{Name: 'Yes', Function: function() {
+				d.Close();
+				window.location.href = "{ url 'team-logout' }";
+			}},
+			{Name: 'No', Function: function() {d.Close()}},
+		],
+	});
+};
+</script>

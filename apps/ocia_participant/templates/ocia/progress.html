@@ -1,0 +1,122 @@
+{% load static %}
+{% load assets %}
+
+<style>
+.progress-container {
+  width: 90%;
+  margin: 40px auto;
+  position: relative;
+}
+
+.progress-bar {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 4px;
+  background-color: #ccc;
+  transform: translateY(-50%);
+  width: 100%;
+  z-index: 1;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: var(--PrimaryBackgroundColor);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  transition: width 0.3s ease;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 3;
+}
+
+.step {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: Arial;
+}
+
+.step.completed {
+  background-color: var(--PrimaryBackgroundColor);
+}
+
+.step.active {
+  background-color: var(--PrimaryBackgroundColor);
+}
+
+.step.active::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.step.incomplete {
+  background-color: #ccc;
+}
+
+.step.incomplete::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.step::after {
+  content: attr(data-label);
+  position: absolute;
+  top: 35px;
+  font-size: 12px !important;
+  line-height: 12px !important;
+  color: #333;
+  white-space: nowrap;
+}
+
+.step .label {
+  position: absolute;
+  top: 30px;              /* Drops it below the node */
+  left: 50%;              /* Centers horizontally */
+  transform: translateX(-50%);
+  font-size: 12px !important;
+  line-height: 12px !important;
+  color: #333;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+</style>
+
+{% with max_node_index=4 %}
+<div class="progress-container">
+  <div class="progress-bar">
+    <div class="progress-bar-fill" style="width: calc(100% * {{ node_index }} / {{ max_node_index }});"></div>
+  </div>
+  <div class="progress-steps">
+    <div class="step {% if node_index < 0 %}incomplete{% elif node_index == 0 %}active{% else %}completed{% endif %}"><div class="label">Personal<br>Information</div></div>
+    <div class="step {% if node_index < 1 %}incomplete{% elif node_index == 1 %}active{% else %}completed{% endif %}"><div class="label">Religious<br>Background</div></div>
+    <div class="step {% if node_index < 2 %}incomplete{% elif node_index == 2 %}active{% else %}completed{% endif %}"><div class="label">Marriage<br>History</div></div>
+    <div class="step {% if node_index < 3 %}incomplete{% elif node_index == 3 %}active{% else %}completed{% endif %}"><div class="label">Family<br>Information</div></div>
+    <div class="step {% if node_index < 4 %}incomplete{% elif node_index == 4 %}active{% else %}completed{% endif %}"><div class="label">General<br>Questions</div></div>
+  </div>
+</div>
+<div style="height:20px;"></div>
+{% endwith %}
+

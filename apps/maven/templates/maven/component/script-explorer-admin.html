@@ -1,0 +1,22 @@
+{% load assets %}
+{% load maven %}
+{% csrf_token %}
+
+{% include "maven/component/script-vars.html" %}
+<script>
+"use strict";
+var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+$(document).ready(
+	function () {
+		let explorerHeight = $(window).height() - 50;
+		let ribbonDef = DEFAULT_RIBBON_DEF;
+		if (SITE_DEBUG) {ribbonDef.tabs.push('debug');}
+		let explorer = new MavenExplorer({
+			mid: '{{ id }}',
+			ribbon: ribbonDef,
+			height: explorerHeight,
+		});
+		explorer.selectDir(null, null, "{{ maven.root_url }}");
+	}
+);
+</script>

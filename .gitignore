@@ -1,0 +1,14 @@
+/dev
+/doc
+__pycache__/
+.thumb/
+trash/
+*.bak
+*.pyc
+/proj/.coverage
+.vscode/
+temp/
+/media/
+/static/
+migrations/
+/data/

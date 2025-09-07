@@ -1,0 +1,24 @@
+{% load assets %}
+{% load maven %}
+
+{% for file in maven.files %}
+<div id="{{ id }}-file-entry-{{ forloop.counter0 }}" index="{{ forloop.counter0 }}" class="file-entry" onclick="mavenSelectFile('{{id}}', '{{ id }}-file-entry-{{ forloop.counter0 }}', '{{ file.name }}', '{{ file.url }}'{% if file.type == 'image' %}, '{% maven_media_crop file.icon '100x80' %}'{% endif %})">
+	<table>
+		<tr>
+			<td class="indicator"></td>
+			{% if file.type == 'image' %}
+			<td class="icon"><img src="{% maven_media_crop file.icon '100x80' %}"></td>
+			{% else %}
+			<td class="icon"><img src="{% static file.icon %}"></td>
+			{% endif %}
+			<td class="file-info">
+				<div class="filename" access="{% if file.can_edit %}1{% else %}0{% endif %}">{{ file.name }}</div>
+				<div class="modified">{{ file.modified_str }}{% if not file.can_edit %}&nbsp;<i class="lock-icon fas fa-lock"></i>{% endif %}</div>
+				<div class="size">Size: {{ file.size_str }}</div>
+			</td>
+		</tr>
+	</table>
+</div>
+{% endfor %}
+
+

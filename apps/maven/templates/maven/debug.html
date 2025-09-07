@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load assets %}
+{% load maven %}
+
+{% block content %}
+<ul>
+<li><a href="{% url 'maven-explorer-root' %}">Explorer demo</a></li>
+<li><a href="{% url 'maven-test-widgets' %}">Widgets demo</a></li>
+</ul>
+{% endblock %}
+

@@ -1,0 +1,52 @@
+$theme: null;
+
+$dark-threshold: 60;
+
+@if (lightness($base-bg-color) > $dark-threshold)
+{
+    $theme: 'light';
+}
+@else 
+{
+    $theme: 'dark';
+}
+
+@function shade($color, $percent) 
+{
+    @if $percent < 0
+    {
+        $percent: -1 * $percent;
+        @if $theme == 'dark' {@return darken($color, $percent);}
+        @else {@return lighten($color, $percent);}
+    }
+    @else
+    {
+        @if $theme == 'dark' {@return lighten($color, $percent);}
+        @else {@return darken($color, $percent);}
+    }
+}
+
+@function contrast($color, $percent)
+{
+    @if (lightness( $color ) > $dark-threshold)
+    {
+        @return(lighten(#000000, $percent));
+    }
+    @else
+    {
+        @return(darken(#ffffff, $percent));
+    }
+}
+
+@function extend($color, $percent)
+{
+    @if (lightness( $color ) > 40)
+    {
+        @return(darken(#ffffff, $percent));
+    }
+    @else
+    {
+        @return(lighten(#000000, $percent));
+    }
+}
+

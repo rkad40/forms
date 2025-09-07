@@ -1,0 +1,38 @@
+{% extends "maven/base.html" %}
+{% load assets %}
+{% load maven %}
+
+{% block cssfile %}
+{{ block.super }}
+{% include "maven/component/css-file.html" %}
+{% endblock %}
+
+{% block content %}
+<form action="" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+	{% for field in form %}
+		<div class="fieldWrapper">
+			{{ field.label_tag }}
+			<br>
+			{{ field }}
+			{{ field.errors }}
+			{% if field.help_text %}
+			<p class="help">{{ field.help_text|safe }}</p>
+			{% endif %}
+		</div>
+	{% endfor %}
+	<div style="height: 5px;"></div>
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}
+
+{% block jsfile %}
+{{ block.super }}
+{% include "maven/component/js-file.html" %}
+{{ form.media }}
+{% endblock %}
+
+{% block script %}
+{{ block.super }}
+{% include "maven/component/script-vars.html" %}
+{% endblock %}
