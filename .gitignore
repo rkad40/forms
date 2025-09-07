@@ -11,4 +11,4 @@ temp/
 /media/
 /static/
 migrations/
-/data/
+*.db3
