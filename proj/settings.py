@@ -9,8 +9,8 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
-import sys
+import sys # RK Added 2020-11-11
+sys.path.append('/home/me/python/xplib')
 from pathlib import Path
 import fs
 import platform
