@@ -19,7 +19,12 @@ import re
 from django.core.management import call_command
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+import logging
+logger = logging.getLogger(__name__)
 
+def get(self, request):
+    logger.debug("Reached OCIAParticipantNavigationOrStartView")
+    return HttpResponse("Hello from OCIAParticipantNavigationOrStartView")
 
 """
       _                                   _              _                                          

@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logging.debug("WSGI loaded")
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proj.settings')
 
 application = get_wsgi_application()

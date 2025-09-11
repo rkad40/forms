@@ -7,7 +7,7 @@
 <form method="post">
   {% csrf_token %}
   {% include "ocia/progress.html" with node_index=0 %}
-  {% include "main/form.html "%}
+  {% include "main/form.html" %}
   <div class="spacer"></div>
   <div class="header">Continue...</div>
   <div class="help">Please click <strong>Next</strong> to continue on to the next form.</div>
