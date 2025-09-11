@@ -35,6 +35,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# # Added 2025-09-11 to support debug_toolbar.
+# INTERNAL_IPS = [
+#     '127.0.0.1',
+# ]
+# DEBUG_TOOLBAR_CONFIG = {
+#     'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+# }
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,12 +56,14 @@ INSTALLED_APPS = [
     'main',
     'maven',
     'ocia_participant',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -154,6 +165,7 @@ if host == 'Kadura-5':
 else:  # pragma: no cover
     from proj.config.prod import *   # pragma: no cover
 
+# Added 2025-09-10 to enable logging.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -173,3 +185,13 @@ LOGGING = {
     },
 }
 
+# Added 2025-09-11 to allow testing with `debug_toolbar`.
+if DEBUG and not any(arg.startswith('test') for arg in sys.argv):
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE.insert(3, 'debug_toolbar.middleware.DebugToolbarMiddleware')  # adjust index as needed
+
+    INTERNAL_IPS = ['127.0.0.1']
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+    }

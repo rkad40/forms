@@ -20,6 +20,7 @@ from django.contrib import admin
 from django.urls import path, include
 from typing import TYPE_CHECKING
 from apps.ocia_participant.views import OCIAParticipantNavigationOrStartView
+import debug_toolbar
 
 urlpatterns = [
     path('', OCIAParticipantNavigationOrStartView, name='home'),
@@ -29,3 +30,7 @@ urlpatterns = [
     path('maven/', include('maven.urls')), 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+if settings.DEBUG:
+    urlpatterns += [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ]
