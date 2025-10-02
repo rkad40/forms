@@ -123,6 +123,98 @@ class OCIAParticipantSettings(models.Model):
         verbose_name = "OCIA Participant Settings"
         verbose_name_plural = "OCIA Participant Settings"
 
+####################################################################################################
+#   ___   ____ ___    _      ____            _   _      _                   _                      #
+#  / _ \ / ___|_ _|  / \    |  _ \ __ _ _ __| |_(_) ___(_)_ __   __ _ _ __ | |_                    #
+# | | | | |    | |  / _ \   | |_) / _` | '__| __| |/ __| | '_ \ / _` | '_ \| __|                   #
+# | |_| | |___ | | / ___ \  |  __/ (_| | |  | |_| | (__| | |_) | (_| | | | | |_                    #
+#  \___/ \____|___/_/   \_\ |_|   \__,_|_|   \__|_|\___|_| .__/ \__,_|_| |_|\__|                   #
+#                                                        |_|                                       #
+#  ____                _                                                                           #
+# / ___|  ___  ___ ___(_) ___  _ __                                                                #
+# \___ \ / _ \/ __/ __| |/ _ \| '_ \                                                               #
+#  ___) |  __/\__ \__ \ | (_) | | | |                                                              #
+# |____/ \___||___/___/_|\___/|_| |_|                                                              #
+#                                                                                                  #
+#                                                                                                  #
+####################################################################################################
+
+class OCIAParticipantSession(models.Model):
+    participant = models.ForeignKey(
+        "OCIAParticipant",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="session"
+    )
+    uid = models.CharField(
+        verbose_name='UID', 
+        blank=False,
+        null=False,
+        max_length=100,
+        help_text='Unique identifier for this settings record (not editable).'      
+    )
+    access_code = models.CharField(
+        verbose_name='Access Code', 
+        blank=False,
+        null=False,
+        help_text='Access code required for participant to be able to enter participant data.'
+    )
+    email = models.CharField(
+        verbose_name='Email',
+        blank=False,
+        null=False,
+        help_text='Email address of the participant logged into this session.'
+    )
+    state = models.CharField(   
+        verbose_name='State',
+        blank=True,
+        null=True,
+        max_length=100,
+        help_text='Current state of the participant session.'
+    )
+    expires_on = models.DateTimeField(
+        verbose_name='Expires On',
+        help_text='Date/time this session expires.'
+    )
+    created_on = models.DateTimeField(
+        verbose_name='Created On',
+        help_text='Session created on this data/time.',
+        default=timezone.now
+    )   
+    ip_address = models.CharField(
+        verbose_name='IP Address', 
+        blank=True,
+        null=True,
+        max_length=100,
+        help_text='IP address from which the participant logged in.'
+    )
+    user_agent = models.CharField(
+        verbose_name='User Agent', 
+        blank=True,
+        null=True,
+        max_length=1000,
+        help_text='User agent string of the browser used by the participant.'
+    )
+    is_logged_in = models.BooleanField(
+        verbose_name='Is Logged In',
+        default=False,
+        help_text='Indicates whether the participant is currently logged in.'
+    )
+    is_valid = models.BooleanField(
+        verbose_name='Is Valid',
+        default=True,
+        help_text='Indicates whether this session is valid.'
+    )
+    def is_expired(self) -> bool:
+        if self.is_valid is False: return True
+        return timezone.now() > self.expires_on
+    def __str__(self):
+        return f"Session from {self.ip_address} (expires {self.expires_on})"
+    class Meta:
+        verbose_name = "OCIA Participant Session"
+        verbose_name_plural = "OCIA Participant Sessions"
+
 '''
    ___   ____ ___    _      ____            _   _      _                   _   
   / _ \ / ___|_ _|  / \    |  _ \ __ _ _ __| |_(_) ___(_)_ __   __ _ _ __ | |_ 

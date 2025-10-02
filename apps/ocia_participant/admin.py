@@ -5,8 +5,13 @@ from django.http import HttpResponseRedirect
 from .models import (
     OCIAParticipantSettings,
     OCIAParticipant, OCIAParticipantMarriage, OCIAParticipantParent,
-    OCIAParticipantEngagement, OCIAParticipantQuestions, OCIAParticipantReligion
+    OCIAParticipantEngagement, OCIAParticipantQuestions, OCIAParticipantReligion,
+    OCIAParticipantSession
 )
+
+@admin.register(OCIAParticipantSession)
+class OCIAParticipantSessionAdmin(admin.ModelAdmin):
+    list_display = ('email', 'uid', 'is_logged_in', 'expires_on')
 
 @admin.register(OCIAParticipantSettings)
 class OCIAPartipantSiteSettingsAdmin(admin.ModelAdmin):
