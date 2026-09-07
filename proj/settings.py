@@ -169,11 +169,29 @@ else:  # pragma: no cover
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
     'handlers': {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'formatter': 'verbose',
+        },
+        'ocia_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'ocia_participant.log'),
+            'formatter': 'verbose',
+        },
+        # Optional: add console output for dev
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
         },
     },
     'loggers': {
@@ -181,6 +199,11 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'ocia_participant': {
+            'handlers': ['ocia_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }

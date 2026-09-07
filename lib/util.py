@@ -57,10 +57,10 @@ def color_variant(rgb: str, percent: float = 10) -> str:
 
     return "#{:02x}{:02x}{:02x}".format(r_new, g_new, b_new)
 
-def rand_token():
+def rand_token(size=32):
     import secrets
     hex_string = secrets.token_hex(32)  # 32 bytes × 2 hex chars = 64 characters
-    return(hex_string[0:32])
+    return(hex_string[0:size])
 
 def print_random_tokens():
     import secrets
