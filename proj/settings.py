@@ -160,11 +160,18 @@ EMAIL_HOST_PASSWORD = whisper.decrypt(b'gAAAAABgDc1F14ky9XQvG_jc-dLbpBogyCl-2pay
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-# This allows me to seamlessly transition from my development environment during debug to my production environment.
-if host == 'Kadura-5':
+# Select settings explicitly in deployed and automated environments. Preserve the
+# historical workstation default for local development when DJANGO_ENV is unset.
+environment = os.environ.get('DJANGO_ENV')
+if environment is None:
+    environment = 'dev' if host == 'Kadura-5' else 'prod'
+
+if environment == 'dev':
     from proj.config.dev import *
-else:  # pragma: no cover
-    from proj.config.prod import *   # pragma: no cover
+elif environment == 'prod':  # pragma: no cover
+    from proj.config.prod import *  # pragma: no cover
+else:
+    raise RuntimeError("DJANGO_ENV must be either 'dev' or 'prod'.")
 
 # Added 2025-09-10 to enable logging.
 LOGGING = {
