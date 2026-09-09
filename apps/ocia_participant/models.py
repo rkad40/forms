@@ -224,6 +224,39 @@ class OCIAParticipantSession(models.Model):
                                                         |_|                    
 '''
 
+class OCIAParticipantAccessToken(models.Model):
+    class Purpose(models.TextChoices):
+        EXISTING = 'existing', 'Existing participant login'
+        NEW = 'new', 'New participant registration'
+
+    participant = models.ForeignKey(
+        "OCIAParticipant",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="access_tokens",
+    )
+    uid = models.CharField(max_length=64, unique=True, db_index=True)
+    token_hash = models.CharField(max_length=64)
+    email = models.CharField(max_length=1000, db_index=True)
+    purpose = models.CharField(max_length=20, choices=Purpose.choices)
+    expires_on = models.DateTimeField()
+    created_on = models.DateTimeField(default=timezone.now)
+    used_on = models.DateTimeField(null=True, blank=True)
+    is_valid = models.BooleanField(default=True)
+    ip_address = models.CharField(max_length=100, null=True, blank=True)
+    user_agent = models.CharField(max_length=1000, null=True, blank=True)
+
+    def is_expired(self) -> bool:
+        return timezone.now() >= self.expires_on
+
+    def __str__(self):
+        return f"{self.email} ({self.purpose}, expires {self.expires_on})"
+
+    class Meta:
+        verbose_name = "OCIA Participant Access Token"
+        verbose_name_plural = "OCIA Participant Access Tokens"
+
 class OCIAParticipant(models.Model):
     first_name = models.CharField(
         "First Name✽",

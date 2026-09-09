@@ -1,0 +1,14 @@
+{% extends "main/base.html" %}
+
+{% block head-css-link %}
+<meta name="referrer" content="origin">
+{% endblock %}
+
+{% block content %}
+<h2>Confirm access</h2>
+<p>Continue to securely access your OCIA participant form. This link can only be used once.</p>
+<form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary" type="submit">Continue</button>
+</form>
+{% endblock %}

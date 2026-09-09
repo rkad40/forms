@@ -10,6 +10,7 @@ urlpatterns = [
     path("login", view.OCIAParticipantLoginView, name="OCIAParticipantLoginView"), 
     path("access/notification/existing", view.OCIAParticipantEmailAccessExistingView, name="OCIAParticipantEmailAccessExistingView"), 
     path("access/notification/new", view.OCIAParticipantEmailAccessNewView, name="OCIAParticipantEmailAccessNewView"), 
+    path("access/confirm/<str:uid>/<str:token>", view.OCIAParticipantAccessTokenConfirmationView, name="OCIAParticipantAccessTokenConfirmationView"),
     path("access/confirmation/existing/<str:code>", view.OCIAParticipantAccessConfirmationExistingView, name="OCIAParticipantAccessConfirmationExistingView"), 
     path("access/confirmation/new/<str:code>", view.OCIAParticipantAccessConfirmationNewView, name="OCIAParticipantAccessConfirmationNewView"), 
     path("logout", view.OCIAParticipantLogoutView, name="OCIAParticipantLogoutView"), 

@@ -18,6 +18,7 @@ from django.urls import reverse
 import re
 from django.core.management import call_command
 from django.conf import settings
+from django.db import transaction
 from django.core.mail import EmailMultiAlternatives
 import logging; logger = logging.getLogger(__name__)
 from datetime import timedelta
@@ -44,6 +45,52 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR', '')
     return ip
+
+ACCESS_TOKEN_LIFETIME = timedelta(minutes=30)
+
+
+def issue_participant_access_token(
+    request: HttpRequest,
+    email: str,
+    participant: Optional[m.OCIAParticipant],
+) -> tuple[m.OCIAParticipantAccessToken, str]:
+    normalized_email = email.strip().lower()
+    purpose = (
+        m.OCIAParticipantAccessToken.Purpose.EXISTING
+        if participant is not None
+        else m.OCIAParticipantAccessToken.Purpose.NEW
+    )
+    m.OCIAParticipantAccessToken.objects.filter(
+        email__iexact=normalized_email,
+        is_valid=True,
+        used_on__isnull=True,
+    ).update(is_valid=False)
+
+    raw_token = secrets.token_urlsafe(32)
+    token = m.OCIAParticipantAccessToken.objects.create(
+        participant=participant,
+        uid=secrets.token_urlsafe(24),
+        token_hash=hashlib.sha256(raw_token.encode('utf-8')).hexdigest(),
+        email=normalized_email,
+        purpose=purpose,
+        expires_on=timezone.now() + ACCESS_TOKEN_LIFETIME,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+    )
+    return token, raw_token
+
+
+def participant_access_url(token: m.OCIAParticipantAccessToken, raw_token: str) -> str:
+    path = reverse(
+        'OCIAParticipantAccessTokenConfirmationView',
+        kwargs={'uid': token.uid, 'token': raw_token},
+    )
+    return settings.HTTP_ROOT.rstrip('/') + path
+
+
+def access_token_matches(token: m.OCIAParticipantAccessToken, raw_token: str) -> bool:
+    supplied_hash = hashlib.sha256(raw_token.encode('utf-8')).hexdigest()
+    return secrets.compare_digest(token.token_hash, supplied_hash)
 
 ####################################################################################################
 #       _                                   _              _                                       #
@@ -126,7 +173,8 @@ def validate_email(value) -> bool:
 class OCIAParticipantView:
     session_keys = ('participant_id', 'participant_id_temp', 'participant_access_code', 
                     'participant_debug_mode', 'participant_error_message', 'participant_create_enabled',
-                    'participant_email')
+                    'participant_email', 'participant_verified_token_uid',
+                    'participant_access_token_uid', 'participant_access_token_secret')
 
     def __init__(self, request:HttpRequest) -> None:
         self.request = request
@@ -326,21 +374,16 @@ def OCIAParticipantLoginView(request:HttpRequest) -> HttpResponse:
             validate_email(email)
         except Exception as err:
             return view.error(f'Invalid email address entered: "{email}". {err}')
-        view.load_user_session(email)
         try:
             participant = m.OCIAParticipant.objects.filter(email__iexact=email).first()
+            token, raw_token = issue_participant_access_token(request, email, participant)
+            request.session["participant_access_token_uid"] = token.uid
+            request.session["participant_access_token_secret"] = raw_token
+            request.session["participant_debug_mode"] = settings.DEBUG or email.endswith('@fake.com')
+            request.session["participant_email"] = email
             if participant is None:
-                request.session["participant_create_enabled"] = -1
-                request.session["participant_access_code"] = hashlib.sha256(secrets.token_bytes(32)).hexdigest()[0:32]
-                request.session["participant_debug_mode"] = True if settings.DEBUG or email.endswith('@fake.com') else False
-                request.session["participant_email"] = email
                 return redirect('OCIAParticipantEmailAccessNewView')
-            else:
-                request.session["participant_id_temp"] = participant.id
-                request.session["participant_access_code"] = hashlib.sha256(secrets.token_bytes(32)).hexdigest()[0:32]
-                request.session["participant_debug_mode"] = True if settings.DEBUG or email.endswith('@fake.com') else False
-                request.session["participant_email"] = email
-                return redirect('OCIAParticipantEmailAccessExistingView')
+            return redirect('OCIAParticipantEmailAccessExistingView')
         except Exception as err:
             return view.error(f'Invalid request.')
     context = {
@@ -375,11 +418,17 @@ def OCIAParticipantLoginView(request:HttpRequest) -> HttpResponse:
 @require_http_methods(["GET"])
 def OCIAParticipantEmailAccessExistingView(request:HttpRequest) -> HttpResponse:
     view = OCIAParticipantView(request)
-    access_code = request.session.get("participant_access_code", None)
-    if access_code is None:
+    uid = request.session.get("participant_access_token_uid")
+    raw_token = request.session.get("participant_access_token_secret")
+    if not uid or not raw_token:
         return view.error('Invalid request.')
-    url = request.scheme + "://" + request.get_host() + reverse('OCIAParticipantAccessConfirmationExistingView', kwargs={"code": access_code})
-    
+    token = get_object_or_404(
+        m.OCIAParticipantAccessToken,
+        uid=uid,
+        purpose=m.OCIAParticipantAccessToken.Purpose.EXISTING,
+        is_valid=True,
+    )
+    url = participant_access_url(token, raw_token)
     user_email = request.session.pop("participant_email")
 
     text_content = []
@@ -407,6 +456,10 @@ def OCIAParticipantEmailAccessExistingView(request:HttpRequest) -> HttpResponse:
         email.attach_alternative(html_content, "text/html")
         email.send()
     except Exception as err:
+        token.is_valid = False
+        token.save(update_fields=["is_valid"])
+        request.session.pop("participant_access_token_uid", None)
+        request.session.pop("participant_access_token_secret", None)
         request.session["participant_error_message"] = f'Our system tried to send a login email with your access code to {user_email} but failed: {err}'
         return redirect('OCIAParticipantErrorView')
 
@@ -416,6 +469,8 @@ def OCIAParticipantEmailAccessExistingView(request:HttpRequest) -> HttpResponse:
         "fake": request.session.get("participant_debug_mode", False),
     }
     request.session.pop("participant_debug_mode", None)
+    request.session.pop("participant_access_token_uid", None)
+    request.session.pop("participant_access_token_secret", None)
     return render(request, "ocia/ocia-participant-email-access-existing-page.html", context)
 
 ####################################################################################################
@@ -443,11 +498,17 @@ def OCIAParticipantEmailAccessExistingView(request:HttpRequest) -> HttpResponse:
 @require_http_methods(["GET"])
 def OCIAParticipantEmailAccessNewView(request:HttpRequest) -> HttpResponse:
     view = OCIAParticipantView(request)
-    access_code = request.session.get("participant_access_code", None)
-    if access_code is None:
+    uid = request.session.get("participant_access_token_uid")
+    raw_token = request.session.get("participant_access_token_secret")
+    if not uid or not raw_token:
         return view.error('Invalid request.')
-    url = request.scheme + "://" + request.get_host() + reverse('OCIAParticipantAccessConfirmationNewView', kwargs={"code": access_code})
-    
+    token = get_object_or_404(
+        m.OCIAParticipantAccessToken,
+        uid=uid,
+        purpose=m.OCIAParticipantAccessToken.Purpose.NEW,
+        is_valid=True,
+    )
+    url = participant_access_url(token, raw_token)
     user_email = request.session.pop("participant_email")
 
     text_content = []
@@ -475,6 +536,10 @@ def OCIAParticipantEmailAccessNewView(request:HttpRequest) -> HttpResponse:
         email.attach_alternative(html_content, "text/html")
         email.send()
     except Exception as err:
+        token.is_valid = False
+        token.save(update_fields=["is_valid"])
+        request.session.pop("participant_access_token_uid", None)
+        request.session.pop("participant_access_token_secret", None)
         request.session["participant_error_message"] = f'Our system tried to send a login email with your access code to {user_email} but failed: {err}'
         return redirect('OCIAParticipantErrorView')
 
@@ -483,6 +548,9 @@ def OCIAParticipantEmailAccessNewView(request:HttpRequest) -> HttpResponse:
         "url": url,
         "fake": request.session.get("participant_debug_mode", False),
     }
+    request.session.pop("participant_debug_mode", None)
+    request.session.pop("participant_access_token_uid", None)
+    request.session.pop("participant_access_token_secret", None)
     return render(request, "ocia/ocia-participant-email-access-new-page.html", context)
 
 ####################################################################################################
@@ -512,6 +580,68 @@ def OCIAParticipantEmailAccessNewView(request:HttpRequest) -> HttpResponse:
 #                                                                                                  #
 #                                                                                                  #
 ####################################################################################################
+
+@require_http_methods(["GET", "POST"])
+def OCIAParticipantAccessTokenConfirmationView(
+    request: HttpRequest,
+    uid: str,
+    token: str,
+) -> HttpResponse:
+    view = OCIAParticipantView(request)
+    error_message = 'This access link is invalid, expired, or has already been used. Please request a new link.'
+
+    try:
+        access_record = m.OCIAParticipantAccessToken.objects.get(uid=uid)
+    except m.OCIAParticipantAccessToken.DoesNotExist:
+        return view.error(error_message)
+
+    if (
+        not access_record.is_valid
+        or access_record.used_on is not None
+        or access_record.is_expired()
+        or access_record.purpose not in m.OCIAParticipantAccessToken.Purpose.values
+        or (
+            access_record.purpose == m.OCIAParticipantAccessToken.Purpose.EXISTING
+            and access_record.participant_id is None
+        )
+        or not access_token_matches(access_record, token)
+    ):
+        return view.error(error_message)
+
+    if request.method == "GET":
+        return render(
+            request,
+            "ocia/ocia-participant-access-confirmation.html",
+            {"site": view.site_settings},
+        )
+
+    with transaction.atomic():
+        try:
+            access_record = m.OCIAParticipantAccessToken.objects.select_for_update().get(uid=uid)
+        except m.OCIAParticipantAccessToken.DoesNotExist:
+            return view.error(error_message)
+
+        if (
+            not access_record.is_valid
+            or access_record.used_on is not None
+            or access_record.is_expired()
+            or not access_token_matches(access_record, token)
+        ):
+            return view.error(error_message)
+
+        access_record.is_valid = False
+        access_record.used_on = timezone.now()
+        access_record.save(update_fields=["is_valid", "used_on"])
+
+        request.session.cycle_key()
+        if access_record.purpose == m.OCIAParticipantAccessToken.Purpose.EXISTING:
+            request.session["participant_id"] = access_record.participant_id
+            return redirect("OCIAParticipantNavigationView")
+
+        request.session["participant_create_enabled"] = True
+        request.session["participant_email"] = access_record.email
+        request.session["participant_verified_token_uid"] = access_record.uid
+        return redirect("OCIAParticipantCreateView")
 
 @require_http_methods(["GET"])
 def OCIAParticipantAccessConfirmationExistingView(request:HttpRequest, code:str) -> HttpResponse:
@@ -590,17 +720,28 @@ def OCIAParticipantCreateView(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = f.OCIAParticipantForm(request.POST)
     else:
-        data = dict(email=request.session.pop('participant_email', ''))
+        data = dict(email=request.session.get('participant_email', ''))
         form = f.OCIAParticipantForm(initial=data)
     if request.method == "POST" and form.is_valid():
         request.session.pop('participant_create_enabled', False)
         participant:m.OCIAParticipant = form.save(commit=False)
         # hashlib.sha256(secrets.token_bytes(32)).hexdigest()[0:32]
-        email = str(participant.email).lower()
+        email = str(participant.email).strip().lower()
+        verified_email = str(request.session.get("participant_email", "")).strip().lower()
+        if verified_email and email != verified_email:
+            return view.error("The submitted email address does not match the verified access link.")
         if m.OCIAParticipant.objects.filter(email__iexact=email).exists():
             return view.error(f'The specified email address <strong>{email}</strong> is already in use. Do you want to <a href="{reverse("OCIAParticipantLoginView")}">login</a>?')
         participant.liturgical_year = view.app_settings.liturgical_year
         participant.save()
+        verified_token_uid = request.session.pop("participant_verified_token_uid", None)
+        if verified_token_uid:
+            m.OCIAParticipantAccessToken.objects.filter(
+                uid=verified_token_uid,
+                purpose=m.OCIAParticipantAccessToken.Purpose.NEW,
+                participant__isnull=True,
+            ).update(participant=participant)
+        request.session.pop("participant_email", None)
         request.session["participant_id"] = participant.id
         return redirect("OCIAParticipantReligionCreateView")
     context = {

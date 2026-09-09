@@ -2,7 +2,7 @@
 
 > Purpose: a compact, code-grounded knowledge base for AI-assisted maintenance. Search this file by the headings, symbols, route names, model names, or task keywords below. Re-check the referenced source before changing behavior: this is a retrieval map, not a replacement for the code.
 >
-> Snapshot reviewed: 2026-09-07. Primary application: `apps/ocia_participant`. Supporting applications: `apps/main` and `apps/maven`.
+> Snapshot reviewed: 2026-09-08. Primary application: `apps/ocia_participant`. Supporting applications: `apps/main` and `apps/maven`.
 
 ## 1. Executive summary
 
@@ -41,7 +41,7 @@ The application is a server-rendered monolith:
 | `lib/util.py` | Color helpers and random token helper | Theme/session token details |
 | `lib/whisper.py` | Fernet decrypt/encrypt with embedded key | Credential/config security |
 
-There are no migration files visible in this snapshot. Django therefore treats local apps as unmigrated and attempts table synchronization during tests.
+Local migration files are present and the current SQLite database is aligned with them. Maven migration `0002` uses an idempotent `DROP TABLE IF EXISTS` for a removed legacy model; OCIA migrations are applied through `0009`, which additively creates the access-token table without modifying participant records.
 
 ## 3. Runtime topology
 
@@ -72,7 +72,8 @@ OCIAParticipant
   |-- 0..1 OCIAParticipantQuestions   related_name=questions, CASCADE
   |-- 0..* OCIAParticipantMarriage    related_name=marriages, CASCADE
   |-- 0..* OCIAParticipantParent      related_name=parents, CASCADE
-  `-- 0..* OCIAParticipantSession     related_name=session, CASCADE; participant nullable
+  |-- 0..* OCIAParticipantSession     related_name=session, CASCADE; participant nullable
+  `-- 0..* OCIAParticipantAccessToken related_name=access_tokens, CASCADE; participant nullable
 ```
 
 ### `OCIAParticipantSettings`
@@ -84,6 +85,10 @@ Global workflow configuration: `access_code`, `liturgical_year`, and `enable_edi
 Database audit/state for passwordless access: nullable participant FK, unique-ish token concepts (`uid`, `access_code`), email, state, expiry, creation time, client IP, user agent, `is_logged_in`, and `is_valid`. `is_expired()` returns true when invalid or past `expires_on`. View code deletes expired rows and creates/refreshes records with a three-day expiry.
 
 Important: this model is not Django's session model. The browser's Django session is still the effective authorization state.
+
+### `OCIAParticipantAccessToken`
+
+Database-backed passwordless access token and audit record. It stores a unique UID, SHA-256 token hash, normalized email, existing/new purpose, optional participant FK, 30-minute expiry, creation/use timestamps, validity, IP, and user agent. The raw secret exists only in the emailed URL and short-lived notification redirect state.
 
 ### `OCIAParticipant`
 
@@ -120,18 +125,19 @@ Templates may hide irrelevant fields using JavaScript, but hidden fields are not
 
 ## 6. Passwordless login and registration flow
 
+Newly requested access links use `OCIAParticipantAccessToken`, an additive database-backed token model. The emailed URL contains a random record UID and raw secret; only the SHA-256 hash of the secret is stored. Tokens expire after 30 minutes, are single-use, and a newly requested token invalidates older unused tokens for the same normalized email address.
+
 ### Existing participant
 
 ```text
-GET / or /ocia/participant/participant
-  -> login page
 POST /ocia/participant/login with email
   -> case-insensitive participant lookup
-  -> stash participant_id_temp, participant_access_code, participant_email
-  -> /access/notification/existing sends link
-  -> user opens /access/confirmation/existing/<code>
-  -> compare URL code with session-held code
-  -> promote participant_id_temp to participant_id
+  -> create database token linked to participant
+  -> email canonical /access/confirm/<uid>/<token> URL
+  -> link may be opened in a different browser/device
+  -> GET validates without consuming and renders Continue form
+  -> CSRF-protected POST validates and consumes token atomically
+  -> rotate Django session key and set participant_id
   -> navigation dashboard
 ```
 
@@ -139,10 +145,12 @@ POST /ocia/participant/login with email
 
 ```text
 POST login with unknown email
-  -> stash participant_create_enabled, participant_access_code, participant_email
-  -> /access/notification/new sends link
-  -> /access/confirmation/new/<code>
-  -> /create
+  -> create database token with purpose=new and verified email
+  -> email canonical /access/confirm/<uid>/<token> URL
+  -> GET validates without consuming
+  -> CSRF-protected POST consumes token and authorizes creation
+  -> create form is bound to the verified email
+  -> saved participant is linked back to the token audit record
   -> religion/create
   -> engagement/create only when participant.engaged == yes
   -> marriage/create only when num_marriages > 0
@@ -151,9 +159,11 @@ POST login with unknown email
   -> navigation dashboard
 ```
 
-The access link is bound to the same browser session because the expected code and temporary participant/email state live in `request.session`. Opening the email on another browser/device will not have the matching state. Generated URL codes are SHA-256-derived random hex strings in the active login flow; `generate_access_code()` separately creates a 10-character code for `OCIAParticipantSession`.
+The GET-then-POST confirmation prevents ordinary email scanners/link previews from consuming a token. The confirmation page uses an origin-only referrer policy so the token path is not leaked while browser POSTs retain a valid same-origin `Origin` for Django CSRF checks. Confirmation uses a database transaction, constant-time hash comparison, expiry/used/validity checks, and Django session-key rotation. Raw tokens are not stored in the database or admin.
 
-In debug mode, or for an address ending `@fake.com`, notification pages expose a fake/debug path rather than requiring live mail behavior. Review the templates before changing this development convenience.
+The prior session-bound existing/new confirmation routes remain temporarily available so already-issued links and existing logged-in `participant_id` sessions are not disrupted. Newly requested emails no longer use those routes. Remove the legacy routes after the transition window and after confirming no old links remain in use.
+
+In debug mode, or for an address ending `@fake.com`, notification pages expose the generated URL for testing while still using the same database-token flow.
 
 ## 7. Session and authorization contract
 
@@ -162,19 +172,21 @@ In debug mode, or for an address ending `@fake.com`, notification pages expose a
 Known workflow session keys:
 
 - `participant_id`: effective logged-in participant ID.
-- `participant_id_temp`: existing participant pending link confirmation.
-- `participant_access_code`: expected one-time URL code.
-- `participant_create_enabled`: authorizes reaching participant creation.
-- `participant_email`: email carried into creation/email sending.
+- `participant_id_temp`: legacy existing-participant confirmation state; no longer issued by the new flow.
+- `participant_access_code`: legacy browser-bound URL code; no longer issued by the new flow.
+- `participant_create_enabled`: authorizes participant creation after successful token confirmation.
+- `participant_email`: verified email carried into participant creation.
 - `participant_debug_mode`: development/fake-mail behavior.
 - `participant_error_message`: flash-like error content consumed by the error page.
-- `ocia_participant_session_uid`: database-session identifier; notably absent from `OCIAParticipantView.session_keys`, so `clear_session()` does not remove it.
+- `participant_verified_token_uid`: associates a newly created participant with its consumed token audit record.
+- `participant_access_token_uid` / `participant_access_token_secret`: short-lived notification-redirect state removed after email delivery.
+- `ocia_participant_session_uid`: legacy database-session identifier; the new login flow no longer calls `load_user_session()`.
 
 Most create/update/navigation/delete views enforce both `view.participant is not None` and `OCIAParticipantSettings.enable_editing`. Creation is special: it is gated by `participant_create_enabled`, then sets `participant_id` after saving.
 
-Security-critical invariant: every child-object update or delete must scope the query to `participant_id=view.participant_id`. Current update views do this with `get_object_or_404`. The generic delete view currently fetches parent/engagement/marriage by ID alone and therefore permits an authenticated participant to delete another participant's child row if its numeric ID is known. Fix this before exposing predictable IDs or treating the route as safe.
+Security-critical invariant: every child-object update or delete must scope the query to `participant_id=view.participant_id`. Update views and the generic parent/engagement/marriage delete view now enforce this with `get_object_or_404`. Cross-participant deletion attempts return 404 and are covered by regression tests.
 
-The delete endpoint is GET-only and mutates data. It should normally be a CSRF-protected POST and enforce ownership.
+The delete endpoint requires POST, uses a CSRF-protected form, enforces ownership, and rejects unknown record categories.
 
 ## 8. URL inventory
 
@@ -186,8 +198,9 @@ All names below are global (no app namespace). The included prefix is `/ocia/par
 | `login` | email entry and lookup |
 | `access/notification/existing` | send/render existing-user link notice |
 | `access/notification/new` | send/render new-user link notice |
-| `access/confirmation/existing/<code>` | validate link and log in |
-| `access/confirmation/new/<code>` | validate link and allow create |
+| `access/confirm/<uid>/<token>` | new cross-browser GET landing page and CSRF-protected POST confirmation |
+| `access/confirmation/existing/<code>` | temporary legacy existing-participant confirmation |
+| `access/confirmation/new/<code>` | temporary legacy new-participant confirmation |
 | `logout` | clear participant workflow session keys |
 | `create`, `update` | participant root record |
 | `religion/create`, `religion/update` | religion one-to-one |
@@ -196,7 +209,7 @@ All names below are global (no app namespace). The included prefix is `/ocia/par
 | `parent/create`, `parent/add`, `parent/update/<pk>` | parent collection |
 | `questions/create`, `questions/update` | questions one-to-one |
 | `navigation` | self-service dashboard |
-| `delete/<category>/<id>` | deletes parent, engagement, or marriage |
+| `delete/<category>/<id>` | CSRF-protected POST; deletes an owned parent, engagement, or marriage record |
 | `delete` | invalid-request error |
 | `error` | consumes and displays session error |
 | `test` | test page; reachable route |
@@ -231,49 +244,44 @@ Static dependencies are committed under `apps/main/static/main/site/vendor`; thi
 - The database is SQLite at `BASE_DIR/data/data.db3`.
 - Static output is `BASE_DIR/static`; uploaded media is `BASE_DIR/media` and is served through `static()` in the root URLconf.
 - `TIME_ZONE = 'UTC'` with timezone-aware datetimes.
-- Development versus production config is selected by `platform.node() == 'Kadura-5'`; every other hostname is treated as production.
-- Production `HTTP_ROOT` is an HTTP IP while allowed hosts are domain names. Both dev and prod set secure session/CSRF cookies false.
+- Configuration can be selected explicitly with `DJANGO_ENV=dev|prod`; when unset, the historical `platform.node() == 'Kadura-5'` development fallback remains for compatibility.
+- Production uses `https://kadura.net`, secure session/CSRF cookies, HTTPS redirects, trusted HTTPS CSRF origins, and staged one-hour HSTS including subdomains. HSTS preload remains intentionally disabled until deployment validation is complete.
 - Debug toolbar is dynamically enabled when `DEBUG` and not running tests, but it is not listed in the provided requirements files.
 - Settings import nonstandard modules (`fs`, and views import `ru` and `cronos`) that are not listed in requirements; they appear environment-provided.
 - Logs target `logs/django.log` and `logs/ocia_participant.log`; the directory must already be usable during settings initialization/runtime.
 - SMTP username/password ciphertext is committed in settings and decrypted using a Fernet key committed in `lib/whisper.py`. This is obfuscation, not secret separation. Rotate credentials and load secrets from the environment or a secret manager.
 - `SECRET_KEY` is committed. Production must use a secret supplied outside source control.
 
-## 13. Current verification baseline (2026-09-07)
+## 13. Current verification baseline (2026-09-08)
 
-`python manage.py check` fails with eight `fields.E120` errors because these `CharField`s lack `max_length`:
+- All formerly invalid `CharField` declarations have valid `max_length` values and migration state is established.
+- `python manage.py check` reports no issues.
+- `python manage.py makemigrations --check --dry-run` reports no changes.
+- `python manage.py migrate` completes, with Maven and OCIA migrations fully applied.
+- `python manage.py test` creates a fresh SQLite test database and passes 22 tests.
+- `DJANGO_ENV=prod python manage.py check --deploy` now reports only the separately tracked committed `SECRET_KEY` warning and the intentionally disabled HSTS-preload warning.
 
-- `main.SiteSettings`: `title`, `icon`, `banner_bg_color`, `banner_fg_color`.
-- `ocia_participant.OCIAParticipantSettings`: `access_code`, `liturgical_year`.
-- `ocia_participant.OCIAParticipantSession`: `access_code`, `email`.
-
-`python manage.py test` cannot create the SQLite test database and stops with `django.db.utils.OperationalError: near "None": syntax error`; this follows from invalid generated column SQL for the missing lengths. Consequently the existing test cases are not currently executing.
-
-The OCIA tests cover only login GET, start/navigation redirects, session error display, and basic standalone email validation. They do not cover the full email-link flow, model forms, wizard branches, ownership, editing-disabled behavior, CRUD, email failures, expiration, or cross-browser behavior. `apps/maven/tests.py` is separate and much larger.
+OCIA regression coverage now includes cross-browser access, non-consuming confirmation GETs, CSRF-protected token consumption, one-time-use enforcement, tampered/expired/replaced tokens, new-registration authorization, legacy-link compatibility, owned deletion, cross-participant deletion attempts for marriage/engagement/parent records, POST enforcement, unknown categories, logged-out access, and editing-disabled behavior. Coverage remains limited for the full email-link flow, model forms, wizard branches, broader CRUD, email failures, expiration, and cross-browser behavior. Maven's fixture setup explicitly creates its expected empty directory, and its file-move path handling is covered by the passing Maven test.
 
 ## 14. Risks and known defects, prioritized
 
 ### Critical/high
 
-1. Cross-participant deletion: `OCIAParticipantDeleteRecordView` fetches child records only by ID, without participant ownership filtering.
-2. Secrets in source: Django secret, Fernet key, and recoverable SMTP credentials are committed.
-3. Production transport/cookies are insecure: configured HTTP root and both secure-cookie flags false.
-4. Django system checks fail and tests cannot initialize due to eight invalid `CharField` declarations.
+1. Secrets in source: Django secret, Fernet key, and recoverable SMTP credentials are committed.
 
 ### Medium
 
-1. Passwordless links only work in the browser session that requested them and appear replay-sensitive to session state rather than being independently signed database tokens.
-2. Login identity depends on case-insensitive email lookup without an obvious database uniqueness constraint; duplicate emails can break `.get()` paths.
-3. Mutating delete uses GET, making accidental activation and CSRF-style behavior possible.
-4. HTML error strings and `|safe` rendering increase XSS risk if future messages interpolate user-controlled input.
-5. `get_client_ip()` trusts the first `X-Forwarded-For` value without a trusted-proxy policy.
-6. Hostname-based environment selection is brittle; unknown developer/CI hosts receive production settings.
-7. Missing migrations prevent durable, reviewable schema evolution.
+1. Login identity depends on case-insensitive email lookup without a database uniqueness constraint; duplicate participant emails remain ambiguous because login currently selects the first match.
+2. HTML error strings and `|safe` rendering increase XSS risk if future messages interpolate user-controlled input.
+3. `get_client_ip()` trusts the first `X-Forwarded-For` value without a trusted-proxy policy.
+4. Production reverse-proxy HTTPS handling still requires deployment verification before setting `SECURE_PROXY_SSL_HEADER`; HSTS preload must remain off until every relevant subdomain is permanently HTTPS-capable.
+5. `DJANGO_ENV` has a hostname-based compatibility fallback when unset; production and automation should always set it explicitly.
+6. Token-request rate limiting and automated cleanup of expired/used access-token rows are not yet implemented.
 
 ### Code-quality/maintenance
 
 1. `clean_phone` fails to raise one constructed validation error.
-2. `load_user_session()` has suspicious control flow: the no-email/no-UID branch accesses `self.user_session.is_valid` while `self.user_session` was initialized to `None`; the UID branch assigns `self.user_session.uid` before loading/creating an object. Exercise this path before building on it.
+2. The legacy `load_user_session()` method retains suspicious `None` control flow but is no longer called by the active login flow. Remove it with the legacy confirmation routes after the compatibility window.
 3. Several imports/functions are unused or duplicated in `views.py`, and `views.txt` appears to be a parallel artifact that can confuse searches.
 4. Two test classes share the name `NavigationViewTests`, and coverage is very small.
 5. AppConfig declares `name = 'ocia_participant'` while its file resides below `apps/`; this currently depends on `sys.path` manipulation.
@@ -283,7 +291,7 @@ The OCIA tests cover only login GET, start/navigation redirects, session error d
 ### Add or change a participant field
 
 1. Change `apps/ocia_participant/models.py` and preserve existing choice storage values.
-2. Create a migration (after establishing migrations for the app).
+2. Create and inspect a migration.
 3. Decide whether the public form exposes it; update `OCIAParticipantForm.Meta`, widgets, and cleaners.
 4. Inspect both participant create/update templates and shared `main/form.html`/`base.html` logic.
 5. Decide whether it belongs in admin list/search/filter.
@@ -295,7 +303,7 @@ Update model + migration, form, create/update/add views as appropriate, URL name
 
 ### Change login/access behavior
 
-Trace all session keys through login, both notification views, both confirmation views, create, root routing, and logout. Test same-browser success, other-browser behavior, expired/tampered/replayed links, duplicate/mixed-case emails, email backend failures, and editing-disabled mode. Avoid logging access tokens or personal registration content.
+Trace token issuance, both notification views, the database-backed confirmation view, temporary legacy confirmation views, create, root routing, and logout. Preserve non-consuming GET and atomic CSRF-protected POST semantics. Test same/other-browser behavior, expiration, tampering, replay, replacement links, duplicate/mixed-case emails, email backend failures, and editing-disabled mode. Avoid logging access tokens or personal registration content.
 
 ### Fix authorization
 
@@ -311,13 +319,16 @@ Run `python manage.py check --deploy`, tests, migrations, and static collection 
 
 ## 16. Suggested repair sequence
 
-1. Add valid `max_length` values and establish migrations; restore a green `manage.py check` and test database creation.
-2. Fix delete ownership and method semantics; add cross-participant security tests.
-3. Externalize and rotate all committed secrets, then harden HTTPS/cookies/hosts.
-4. Repair and test `OCIAParticipantSession.load_user_session()` paths; decide whether database sessions or Django sessions are authoritative.
-5. Enforce normalized unique email identity and define duplicate-data migration behavior.
-6. Add end-to-end tests for new and existing participant workflows and editing-disabled mode.
-7. Remove unused imports/artifacts and document/install every runtime dependency.
+Completed: valid `max_length` declarations and migrations; green checks/test-database creation; delete ownership, POST, and CSRF hardening; production HTTPS/cookie hardening; explicit `DJANGO_ENV` selection; and additive database-backed, hashed, expiring, single-use cross-browser access tokens with GET-to-POST confirmation and regression tests.
+
+Remaining priorities:
+
+1. Externalize and rotate the committed Django secret, Fernet key, and SMTP credentials.
+2. Verify TLS termination and forwarded-protocol handling in production; only then configure `SECURE_PROXY_SSL_HEADER`, increase HSTS duration, and evaluate preload.
+3. After the compatibility window, remove legacy confirmation routes/session keys and the unused `OCIAParticipantSession.load_user_session()` path; retain Django sessions as authorization state and access-token rows as login audit state.
+4. Enforce normalized unique email identity and define duplicate-data migration behavior.
+5. Add rate limiting and expired/used-token cleanup, then extend end-to-end tests through complete new/existing participant workflows and broader editing-disabled behavior.
+6. Remove unused imports/artifacts and document/install every runtime dependency.
 
 ## 17. Retrieval keywords
 
@@ -331,7 +342,7 @@ Run `python manage.py check --deploy`, tests, migrations, and static collection 
 - **editing lock:** `OCIAParticipantSettings.enable_editing`, `editing_disabled_error()`.
 - **admin / exports / staff:** `apps/ocia_participant/admin.py` (no export feature is evident).
 - **media:** `apps/maven`; independent from OCIA unless a requested feature explicitly connects them.
-- **tests broken / migrations:** verification baseline and missing `max_length` fields.
+- **tests / migrations / verification:** current verification baseline, app migration directories, `manage.py check`, and `makemigrations --check`.
 
 ## 18. AI maintenance rules
 

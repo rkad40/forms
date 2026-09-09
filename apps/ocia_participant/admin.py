@@ -6,8 +6,15 @@ from .models import (
     OCIAParticipantSettings,
     OCIAParticipant, OCIAParticipantMarriage, OCIAParticipantParent,
     OCIAParticipantEngagement, OCIAParticipantQuestions, OCIAParticipantReligion,
-    OCIAParticipantSession
+    OCIAParticipantSession, OCIAParticipantAccessToken
 )
+
+@admin.register(OCIAParticipantAccessToken)
+class OCIAParticipantAccessTokenAdmin(admin.ModelAdmin):
+    list_display = ('email', 'purpose', 'created_on', 'expires_on', 'used_on', 'is_valid')
+    readonly_fields = ('uid', 'token_hash', 'created_on', 'used_on')
+    search_fields = ('email',)
+    list_filter = ('purpose', 'is_valid')
 
 @admin.register(OCIAParticipantSession)
 class OCIAParticipantSessionAdmin(admin.ModelAdmin):
