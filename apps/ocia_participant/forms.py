@@ -71,10 +71,15 @@ class OCIAParticipantForm(OCIAParticipantFormMixin, forms.ModelForm):
         return value
     
     def clean_email(self):
-        value = str(self.cleaned_data["email"]).strip()
+        value = str(self.cleaned_data["email"]).strip().lower()
         if value == '': raise forms.ValidationError("⚠ Email must be defined.")
         pattern = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
         if pattern.match(value) is None: raise forms.ValidationError("⚠ Not a valid email.")
+        duplicates = m.OCIAParticipant.objects.filter(email__iexact=value)
+        if self.instance.pk:
+            duplicates = duplicates.exclude(pk=self.instance.pk)
+        if duplicates.exists():
+            raise forms.ValidationError("⚠ A participant with this email address already exists.")
         return value
 
     def clean_phone(self):

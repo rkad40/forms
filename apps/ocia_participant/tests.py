@@ -3,11 +3,13 @@ from django.urls import reverse
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from django.core import mail
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from datetime import timedelta
 from urllib.parse import urlparse
 import re
 from main.models import SiteSettings
+from ocia_participant.forms import OCIAParticipantForm
 from ocia_participant.models import (
     OCIAParticipant,
     OCIAParticipantAccessToken,
@@ -378,3 +380,77 @@ class ParticipantAccessTokenTests(TestCase):
 
         self.assertRedirects(response, reverse("OCIAParticipantNavigationView"))
         self.assertEqual(client.session["participant_id"], self.participant.id)
+
+
+class ParticipantEmailIdentityTests(TestCase):
+    def test_model_save_normalizes_email(self):
+        participant = OCIAParticipant.objects.create(
+            first_name="Alice",
+            last_name="Participant",
+            email="  Alice.Example@Example.COM  ",
+        )
+
+        participant.refresh_from_db()
+        self.assertEqual(participant.email, "alice.example@example.com")
+
+    def test_database_rejects_normalized_duplicate(self):
+        OCIAParticipant.objects.create(
+            first_name="Alice",
+            last_name="One",
+            email="alice@example.com",
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                OCIAParticipant.objects.create(
+                    first_name="Alice",
+                    last_name="Two",
+                    email="  ALICE@EXAMPLE.COM ",
+                )
+
+    def test_form_rejects_another_participants_email_case_insensitively(self):
+        OCIAParticipant.objects.create(
+            first_name="Alice",
+            last_name="One",
+            email="alice@example.com",
+        )
+        participant = OCIAParticipant.objects.create(
+            first_name="Bob",
+            last_name="Two",
+            email="bob@example.com",
+        )
+        form = OCIAParticipantForm(
+            instance=participant,
+            data={
+                "first_name": "Bob",
+                "last_name": "Two",
+                "email": " ALICE@EXAMPLE.COM ",
+                "num_marriages": "0",
+                "marital_status": "married",
+            },
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+        self.assertIn("already exists", form.errors["email"][0])
+
+    def test_form_allows_current_participants_normalized_email(self):
+        participant = OCIAParticipant.objects.create(
+            first_name="Alice",
+            last_name="Participant",
+            email="alice@example.com",
+        )
+        form = OCIAParticipantForm(
+            instance=participant,
+            data={
+                "first_name": "Alice",
+                "last_name": "Participant",
+                "email": " ALICE@EXAMPLE.COM ",
+                "num_marriages": "0",
+                "marital_status": "married",
+            },
+        )
+
+        form.is_valid()
+        self.assertNotIn("email", form.errors)
+        self.assertEqual(form.cleaned_data["email"], "alice@example.com")

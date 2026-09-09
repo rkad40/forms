@@ -3,6 +3,7 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from django.contrib import admin
 from django.db.models import QuerySet
+from django.db.models.functions import Lower, Trim
 from django.http import HttpRequest
 from typing import Type
 from django.utils import timezone
@@ -371,6 +372,9 @@ class OCIAParticipant(models.Model):
         help_text="If not married, are you are engaged to be married?"
     )
 
+    def save(self, *args, **kwargs):
+        self.email = self.email.strip().lower()
+        super().save(*args, **kwargs)
     @property
     def age(self) -> int | None:
         if not isinstance(self.date_of_birth, date):
@@ -396,6 +400,12 @@ class OCIAParticipant(models.Model):
     class Meta:
         verbose_name = "OCIA Participant"
         verbose_name_plural = "OCIA Participants"
+        constraints = [
+            models.UniqueConstraint(
+                Lower(Trim("email")),
+                name="ocia_participant_email_normalized_unique",
+            ),
+        ]
     def __str__(self):
         return f"{self.full_name}".strip() or "Unnamed Participant"
 

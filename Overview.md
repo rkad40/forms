@@ -41,7 +41,7 @@ The application is a server-rendered monolith:
 | `lib/util.py` | Color helpers and random token helper | Theme/session token details |
 | `lib/whisper.py` | Fernet decrypt/encrypt with embedded key | Credential/config security |
 
-Local migration files are present and the current SQLite database is aligned with them. Maven migration `0002` uses an idempotent `DROP TABLE IF EXISTS` for a removed legacy model; OCIA migrations are applied through `0009`, which additively creates the access-token table without modifying participant records.
+Local migration files are present and the current SQLite database is aligned with them. Maven migration `0002` uses an idempotent `DROP TABLE IF EXISTS` for a removed legacy model; OCIA migrations are applied through `0010`. Migration `0009` additively creates the access-token table, and `0010` normalizes participant emails and adds normalized, case-insensitive database uniqueness without deleting or merging participant records.
 
 ## 3. Runtime topology
 
@@ -92,7 +92,7 @@ Database-backed passwordless access token and audit record. It stores a unique U
 
 ### `OCIAParticipant`
 
-The registration root. Major fields are name and suffix/preferred name, liturgical year, created timestamp, email, phone/text permission, mailing address, birth date/place, sex, marital status, number of marriages, and engaged status. `age` is derived from date of birth; `full_name` is derived from name parts. Email is the lookup identity used by the login flow, even though code-level uniqueness must be checked before assuming database enforcement.
+The registration root. Major fields are name and suffix/preferred name, liturgical year, created timestamp, email, phone/text permission, mailing address, birth date/place, sex, marital status, number of marriages, and engaged status. `age` is derived from date of birth; `full_name` is derived from name parts. Email is the login identity: model saves and participant forms trim and lowercase it, while a database constraint on `Lower(Trim(email))` prevents case- or surrounding-whitespace-equivalent identities.
 
 ### Child records
 
@@ -119,7 +119,7 @@ All public ModelForms use `OCIAParticipantFormMixin`, which replaces RadioSelect
 
 Dates use a text input with class `flatpickr`; the shared base initializes them with `Y-m-d`. Several choice fields render as radio groups.
 
-Participant-specific cleaning trims required names/email, uses an additional email regex, accepts common US phone formats and normalizes them to `(###) ###-####`, rejects blank/non-numeric/negative marriage counts, and requires an engagement response for single participants. A known defect exists in `clean_phone`: the wrong-length branch constructs `forms.ValidationError(...)` but does not `raise` it.
+Participant-specific cleaning trims required names, trims and lowercases email, uses an additional email regex, and reports an existing normalized email as a form validation error. It accepts common US phone formats and normalizes them to `(###) ###-####`, rejects blank/non-numeric/negative marriage counts, and requires an engagement response for single participants. A known defect exists in `clean_phone`: the wrong-length branch constructs `forms.ValidationError(...)` but does not `raise` it.
 
 Templates may hide irrelevant fields using JavaScript, but hidden fields are not automatically server-side policy. Whenever conditional requirements change, update model/form validation and tests—not only template logic.
 
@@ -256,9 +256,10 @@ Static dependencies are committed under `apps/main/static/main/site/vendor`; thi
 
 - All formerly invalid `CharField` declarations have valid `max_length` values and migration state is established.
 - `python manage.py check` reports no issues.
+- The pre-migration participant audit found 24 records, no normalized duplicate groups, no blank emails, and 9 values needing trim/lowercase normalization. Migration `0010` preserved all 24 records; its data step aborts before normalization and lists conflicting participant IDs if duplicate groups exist in another deployment.
 - `python manage.py makemigrations --check --dry-run` reports no changes.
 - `python manage.py migrate` completes, with Maven and OCIA migrations fully applied.
-- `python manage.py test` creates a fresh SQLite test database and passes 22 tests.
+- `python manage.py test` creates a fresh SQLite test database and passes 26 tests.
 - `DJANGO_ENV=prod python manage.py check --deploy` now reports only the separately tracked committed `SECRET_KEY` warning and the intentionally disabled HSTS-preload warning.
 
 OCIA regression coverage now includes cross-browser access, non-consuming confirmation GETs, CSRF-protected token consumption, one-time-use enforcement, tampered/expired/replaced tokens, new-registration authorization, legacy-link compatibility, owned deletion, cross-participant deletion attempts for marriage/engagement/parent records, POST enforcement, unknown categories, logged-out access, and editing-disabled behavior. Coverage remains limited for the full email-link flow, model forms, wizard branches, broader CRUD, email failures, expiration, and cross-browser behavior. Maven's fixture setup explicitly creates its expected empty directory, and its file-move path handling is covered by the passing Maven test.
@@ -271,12 +272,11 @@ OCIA regression coverage now includes cross-browser access, non-consuming confir
 
 ### Medium
 
-1. Login identity depends on case-insensitive email lookup without a database uniqueness constraint; duplicate participant emails remain ambiguous because login currently selects the first match.
-2. HTML error strings and `|safe` rendering increase XSS risk if future messages interpolate user-controlled input.
-3. `get_client_ip()` trusts the first `X-Forwarded-For` value without a trusted-proxy policy.
-4. Production reverse-proxy HTTPS handling still requires deployment verification before setting `SECURE_PROXY_SSL_HEADER`; HSTS preload must remain off until every relevant subdomain is permanently HTTPS-capable.
-5. `DJANGO_ENV` has a hostname-based compatibility fallback when unset; production and automation should always set it explicitly.
-6. Token-request rate limiting and automated cleanup of expired/used access-token rows are not yet implemented.
+1. HTML error strings and `|safe` rendering increase XSS risk if future messages interpolate user-controlled input.
+2. `get_client_ip()` trusts the first `X-Forwarded-For` value without a trusted-proxy policy.
+3. Production reverse-proxy HTTPS handling still requires deployment verification before setting `SECURE_PROXY_SSL_HEADER`; HSTS preload must remain off until every relevant subdomain is permanently HTTPS-capable.
+4. `DJANGO_ENV` has a hostname-based compatibility fallback when unset; production and automation should always set it explicitly.
+5. Token-request rate limiting and automated cleanup of expired/used access-token rows are not yet implemented.
 
 ### Code-quality/maintenance
 
@@ -319,16 +319,15 @@ Run `python manage.py check --deploy`, tests, migrations, and static collection 
 
 ## 16. Suggested repair sequence
 
-Completed: valid `max_length` declarations and migrations; green checks/test-database creation; delete ownership, POST, and CSRF hardening; production HTTPS/cookie hardening; explicit `DJANGO_ENV` selection; and additive database-backed, hashed, expiring, single-use cross-browser access tokens with GET-to-POST confirmation and regression tests.
+Completed: valid `max_length` declarations and migrations; green checks/test-database creation; delete ownership, POST, and CSRF hardening; production HTTPS/cookie hardening; explicit `DJANGO_ENV` selection; additive database-backed, hashed, expiring, single-use cross-browser access tokens with GET-to-POST confirmation; and normalized unique participant email identity with collision-safe migration behavior and regression tests.
 
 Remaining priorities:
 
 1. Externalize and rotate the committed Django secret, Fernet key, and SMTP credentials.
 2. Verify TLS termination and forwarded-protocol handling in production; only then configure `SECURE_PROXY_SSL_HEADER`, increase HSTS duration, and evaluate preload.
 3. After the compatibility window, remove legacy confirmation routes/session keys and the unused `OCIAParticipantSession.load_user_session()` path; retain Django sessions as authorization state and access-token rows as login audit state.
-4. Enforce normalized unique email identity and define duplicate-data migration behavior.
-5. Add rate limiting and expired/used-token cleanup, then extend end-to-end tests through complete new/existing participant workflows and broader editing-disabled behavior.
-6. Remove unused imports/artifacts and document/install every runtime dependency.
+4. Add rate limiting and expired/used-token cleanup, then extend end-to-end tests through complete new/existing participant workflows and broader editing-disabled behavior.
+5. Remove unused imports/artifacts and document/install every runtime dependency.
 
 ## 17. Retrieval keywords
 
@@ -338,6 +337,7 @@ Remaining priorities:
 - **schema / participant data:** `apps/ocia_participant/models.py`, relationship overview above.
 - **validation / fields / widgets:** `apps/ocia_participant/forms.py`, `main/form.html`, `base.html` FieldManager.
 - **branding / colors / site icon:** `SiteSettings`, `lib.util.color_variant`, base template CSS variables.
+- **email identity / uniqueness / duplicate audit:** `OCIAParticipant.save()`, `OCIAParticipantForm.clean_email()`, migration `0010`, and login lookup.
 - **email / SMTP / fake email:** settings email block and access notification views/templates.
 - **editing lock:** `OCIAParticipantSettings.enable_editing`, `editing_disabled_error()`.
 - **admin / exports / staff:** `apps/ocia_participant/admin.py` (no export feature is evident).

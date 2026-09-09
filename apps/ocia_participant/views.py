@@ -375,7 +375,10 @@ def OCIAParticipantLoginView(request:HttpRequest) -> HttpResponse:
         except Exception as err:
             return view.error(f'Invalid email address entered: "{email}". {err}')
         try:
-            participant = m.OCIAParticipant.objects.filter(email__iexact=email).first()
+            try:
+                participant = m.OCIAParticipant.objects.get(email__iexact=email)
+            except m.OCIAParticipant.DoesNotExist:
+                participant = None
             token, raw_token = issue_participant_access_token(request, email, participant)
             request.session["participant_access_token_uid"] = token.uid
             request.session["participant_access_token_secret"] = raw_token

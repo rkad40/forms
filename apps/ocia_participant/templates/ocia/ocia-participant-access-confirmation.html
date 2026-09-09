@@ -6,7 +6,8 @@
 
 {% block content %}
 <h2>Confirm access</h2>
-<p>Continue to securely access your OCIA participant form. This link can only be used once.</p>
+<p>Your email address has been verified. Click <strong>Continue</strong> to sign in and access your OCIA participant form.</p>
+<p>This link can be used only once. If you need to sign in again later, enter your email address at the login prompt and we&rsquo;ll send you a new one-time link.</p>
 <form method="post">
     {% csrf_token %}
     <button class="btn btn-primary" type="submit">Continue</button>
