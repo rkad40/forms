@@ -4,6 +4,9 @@
 
 {% block content %}
 <h2>OCIA Participant - {{ participant }}</h2>
+<form id="delete-record-form" method="post" style="display: none;">
+    {% csrf_token %}
+</form>
 
 <style>
 .ocia-nav .category {
@@ -204,8 +207,10 @@ function DeleteRecord(category, name, id)
 			Buttons:
 			[
 				{Name: 'Yes', Function: function() {
-					dialog.Close;
-					window.location.href = `{% url 'OCIAParticipantDeleteRecordNoArgView' %}/${category}/${id}`
+					dialog.Close();
+					const form = document.getElementById('delete-record-form');
+                    form.action = `{% url 'OCIAParticipantDeleteRecordNoArgView' %}/${category}/${id}`;
+                    form.submit();
 				}
 				},
 				{Name: 'No', Function: dialog.Close},

@@ -39,8 +39,8 @@ class TestFolder:
     dir0 = None
     dir1 = None
 
-SOURCE_DIR = fs.join(fs.dname(fs.abs(__file__)), 'testing', 'source', 'media')
-TARGET_DIR = fs.join(fs.dname(fs.abs(__file__)), 'testing', 'target', 'media')
+SOURCE_DIR = fs.join(fs.dirname(fs.abs(__file__)), 'testing', 'source', 'media')
+TARGET_DIR = fs.join(fs.dirname(fs.abs(__file__)), 'testing', 'target', 'media')
 USERS = []
 
 class MavenTest(TestCase):
@@ -80,6 +80,7 @@ class MavenTest(TestCase):
 
         if fs.exists(TARGET_DIR): fs.delete_dir(TARGET_DIR)
         fs.copy_dir_if_changed(SOURCE_DIR, TARGET_DIR)
+        fs.create_dir(fs.join(TARGET_DIR, 'dir0', 'dir00'))
         initialize_media_folders_in_database()
 
         TestFolder.top = MediaFolder.objects.get(url='')
@@ -421,6 +422,6 @@ class MavenTest(TestCase):
         """
 
         if DEBUG: print(f'Passed {cnt} test assertions!')
-        fs.delete_dir(fs.dname(TARGET_DIR))
+        fs.delete_dir(fs.dirname(TARGET_DIR))
 
 

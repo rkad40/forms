@@ -290,8 +290,8 @@ def AjaxRefresh(request):
                     source_file_path = fs.fix_path_name(fs.join_names(settings.MEDIA_ROOT, source_file_url))
                     target_file_path = fs.fix_path_name(fs.join_names(settings.MEDIA_ROOT, target_file_url))
                     target_file_lock = target_file_path + '.lock'
-                    source_file_dir = fs.dname(source_file_path)
-                    target_file_dir = fs.dname(source_file_path)
+                    source_file_dir = fs.dirname(source_file_path)
+                    target_file_dir = fs.dirname(target_file_path)
                     if not fs.exists(source_file_dir): raise Exception('Source folder "{source_file_dir}" does not exist.')
                     if not fs.exists(source_file_path): raise Exception('Source file "{source_file_path}" does not exist.')
                     if not fs.exists(target_file_dir): raise Exception('Target folder "{target_file_dir}" does not exist.')

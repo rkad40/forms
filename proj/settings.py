@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import sys # RK Added 2020-11-11
 sys.path.append('/home/me/python/xplib')
+sys.path.append( r'C:\Python\xlib')
 from pathlib import Path
 import fs
 import platform

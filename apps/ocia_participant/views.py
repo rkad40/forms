@@ -11,7 +11,7 @@ import secrets
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.views.decorators.http import require_http_methods, require_GET
+from django.views.decorators.http import require_http_methods, require_GET, require_POST
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -1274,20 +1274,27 @@ def OCIAParticipantNavigationOrStartView(request:HttpRequest) -> HttpResponse:
 #                                                                                                  #
 ####################################################################################################
 
-@require_GET
-def OCIAParticipantDeleteRecordView(request:HttpRequest, category:str, id:str) -> HttpResponse:
+@require_POST
+def OCIAParticipantDeleteRecordView(request:HttpRequest, category:str, id:int) -> HttpResponse:
     view = OCIAParticipantView(request)
     if view.participant is None: return view.not_logged_in_error()
     if not view.enable_editing: return view.editing_disabled_error()
-    if category == 'parent':
-        parent = get_object_or_404(m.OCIAParticipantParent, id=id)
-        parent.delete()
-    if category == 'engagement':
-        engagement = get_object_or_404(m.OCIAParticipantEngagement, id=id)
-        engagement.delete()
-    if category == 'marriage':
-        marriage = get_object_or_404(m.OCIAParticipantMarriage, id=id)
-        marriage.delete()
+
+    model_by_category = {
+        'parent': m.OCIAParticipantParent,
+        'engagement': m.OCIAParticipantEngagement,
+        'marriage': m.OCIAParticipantMarriage,
+    }
+    model = model_by_category.get(category)
+    if model is None:
+        return view.error('Invalid record category.')
+
+    record = get_object_or_404(
+        model,
+        id=id,
+        participant_id=view.participant_id,
+    )
+    record.delete()
     return redirect('OCIAParticipantNavigationView')
 
 ####################################################################################################
