@@ -1,0 +1,16 @@
+{% extends "access/base.html" %}
+{% block title %}Send Admin Invite{% endblock %}
+{% block heading %}Send Admin Invite{% endblock %}
+{% block content %}
+<p>Enter the email address for the new administrator. The invitation expires in 48 hours and can only be used once.</p>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-group">
+        <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+        {{ form.email }}{{ form.email.errors }}
+    </div>
+    <button class="btn btn-primary" type="submit">Send invitation</button>
+    <a class="btn btn-outline-secondary" href="{% url 'access_actions' %}">Cancel</a>
+</form>
+{% endblock %}

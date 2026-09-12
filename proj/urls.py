@@ -24,7 +24,7 @@ import debug_toolbar
 
 urlpatterns = [
     path('', home, name='home'),
-    path('admin/', include('access.urls')),
+    path('admin/', include('apps.access.urls')),
     path('admin/', admin.site.urls),
     path('summernote/', include('django_summernote.urls')),
     path('main/', include('main.urls')),

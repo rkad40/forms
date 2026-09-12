@@ -1,0 +1,26 @@
+{% extends "access/base.html" %}
+{% block title %}Admin Actions{% endblock %}
+{% block heading %}Admin Actions{% endblock %}
+{% block content %}
+<p class="text-muted">Signed in as {{ user.email|default:user.username }}</p>
+<div class="list-group">
+    <a class="list-group-item list-group-item-action" href="{% url 'admin:index' %}">
+        <strong>Go to Admin Dashboard</strong><br><small>Manage site content and records.</small>
+    </a>
+    <a class="list-group-item list-group-item-action" href="{% url 'access_update_information' %}">
+        <strong>Update Information</strong><br><small>Change your name or email address.</small>
+    </a>
+    <a class="list-group-item list-group-item-action" href="{% url 'access_password_change' %}">
+        <strong>Reset Password</strong><br><small>Choose a new password for your account.</small>
+    </a>
+    {% if user.is_superuser %}
+    <a class="list-group-item list-group-item-action" href="{% url 'send_admin_invite' %}">
+        <strong>Send Admin Invite</strong><br><small>Invite a new administrator by email.</small>
+    </a>
+    {% endif %}
+</div>
+<form method="post" action="{% url 'access_logout' %}" class="mt-3">
+    {% csrf_token %}
+    <button class="btn btn-outline-danger btn-block" type="submit">Logout</button>
+</form>
+{% endblock %}

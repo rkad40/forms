@@ -1,18 +1,36 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from .forms import AdminAuthenticationForm, AdminPasswordResetForm
+from .forms import AdminPasswordResetForm
+from .views import AccessLoginView, accept_admin_invite, actions, send_admin_invite, update_information
 
 
 urlpatterns = [
     path(
         "login/",
-        auth_views.LoginView.as_view(
-            authentication_form=AdminAuthenticationForm,
-            template_name="access/login.html",
-            next_page=reverse_lazy("admin:index"),
-        ),
+        AccessLoginView.as_view(),
         name="admin_login",
+    ),
+    path("actions/", actions, name="access_actions"),
+    path("actions/information/", update_information, name="access_update_information"),
+    path(
+        "actions/password/",
+        auth_views.PasswordChangeView.as_view(
+            template_name="access/password_change.html",
+            success_url=reverse_lazy("access_actions"),
+        ),
+        name="access_password_change",
+    ),
+    path(
+        "logout/",
+        auth_views.LogoutView.as_view(next_page=reverse_lazy("admin_login")),
+        name="access_logout",
+    ),
+    path("invite/", send_admin_invite, name="send_admin_invite"),
+    path(
+        "invite/<uuid:uid>/<str:token>/",
+        accept_admin_invite,
+        name="admin_invite_accept",
     ),
     path(
         "password-reset/",

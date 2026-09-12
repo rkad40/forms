@@ -1,0 +1,18 @@
+{% extends "access/base.html" %}
+{% block title %}Create Administrator Account{% endblock %}
+{% block heading %}Create Administrator Account{% endblock %}
+{% block content %}
+<p>Your email address will also be your username.</p>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}{{ field.errors }}
+        {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text|safe }}</small>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="btn btn-primary btn-block" type="submit">Create account</button>
+</form>
+{% endblock %}

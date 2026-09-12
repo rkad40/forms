@@ -23,6 +23,7 @@ host = platform.node()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "apps"))
+from apps.access.email import email_backend_for_debug
 # sys.path.insert(0, str(BASE_DIR / "apps" / "forms" / "ocia" / "reg"))
 
 # Quick-start development settings - unsuitable for production
@@ -58,7 +59,7 @@ INSTALLED_APPS = [
     'main',
     'maven',
     'ocia_participant',
-    'access',
+    'apps.access',
     # 'debug_toolbar',
 ]
 
@@ -154,7 +155,7 @@ if True:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/admin/login/'
-LOGIN_REDIRECT_URL = '/admin/'
+LOGIN_REDIRECT_URL = '/admin/actions/'
 
 # RK - Email settings 25-09-05
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -180,11 +181,7 @@ else:
 
 # Never deliver real email from a debug server. Password-reset messages are
 # printed to the runserver console in debug mode and sent by SMTP otherwise.
-EMAIL_BACKEND = (
-    'django.core.mail.backends.console.EmailBackend'
-    if DEBUG
-    else 'django.core.mail.backends.smtp.EmailBackend'
-)
+EMAIL_BACKEND = email_backend_for_debug(DEBUG)
 
 # Added 2025-09-10 to enable logging.
 LOGGING = {

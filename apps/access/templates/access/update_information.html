@@ -1,0 +1,17 @@
+{% extends "access/base.html" %}
+{% block title %}Update Information{% endblock %}
+{% block heading %}Update Information{% endblock %}
+{% block content %}
+<form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+    <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}{{ field.errors }}
+    </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Save changes</button>
+    <a class="btn btn-outline-secondary" href="{% url 'access_actions' %}">Cancel</a>
+</form>
+{% endblock %}
