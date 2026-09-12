@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'proj.summernote.SummernoteConfig',
     'main',
     'maven',
     'ocia_participant',

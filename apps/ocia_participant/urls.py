@@ -3,6 +3,7 @@ import ocia_participant.views as view
 from django.views.generic import TemplateView
 
 urlpatterns = [
+    path("", view.OCIAParticipantNavigationOrStartView, name="OCIAParticipantEntryView"),
     path("participant", view.OCIAParticipantStartView, name="OCIAParticipantStartView"), 
     path("test", view.OCIAParticipantTestView, name="OCIAParticipantTestView"), 
     path("delete/<str:category>/<int:id>", view.OCIAParticipantDeleteRecordView, name="OCIAParticipantDeleteRecordView"), 

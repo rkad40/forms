@@ -2,6 +2,7 @@ asgiref==3.9.1
 cffi==1.17.1
 cryptography==45.0.7
 Django==5.2.5
+django-summernote==0.8.20.0
 filelock==3.19.1
 pillow==11.3.0
 pycparser==2.22

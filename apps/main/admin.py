@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django_summernote.admin import SummernoteModelAdmin
 from .models import SiteSettings
 
 @admin.register(SiteSettings)
-class SiteSettingsAdmin(admin.ModelAdmin):
+class SiteSettingsAdmin(SummernoteModelAdmin):
     list_display = ('title', 'icon', 'banner_bg_color', 'banner_fg_color')
+    summernote_fields = ('home_page_content',)
 
     def has_add_permission(self, request):
         # Prevent adding more than one instance

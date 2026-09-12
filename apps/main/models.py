@@ -7,6 +7,11 @@ class SiteSettings(models.Model):
     icon = models.CharField(verbose_name='Icon')
     banner_bg_color = models.CharField(verbose_name='Banner Background Color')
     banner_fg_color = models.CharField(verbose_name='Banner Foreground Color')
+    home_page_content = models.TextField(
+        verbose_name='Home Page Content',
+        blank=True,
+        help_text='Content displayed on the public home page.',
+    )
 
     def clean(self):
         if SiteSettings.objects.exclude(id=self.id).exists():

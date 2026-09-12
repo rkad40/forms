@@ -1387,14 +1387,9 @@ def OCIAParticipantNavigationView(request:HttpRequest) -> HttpResponse:
 @require_GET
 def OCIAParticipantNavigationOrStartView(request:HttpRequest) -> HttpResponse:
     view = OCIAParticipantView(request)
-    if view.participant is None: 
-        return redirect('OCIAParticipantStartView')
-    if not view.enable_editing: return view.editing_disabled_error()
-    context = {
-        "participant": view.participant,
-        "site": view.site_settings
-    }
-    return render(request, "ocia/ocia-participant-navigation.html", context)
+    if view.participant is None:
+        return redirect('OCIAParticipantLoginView')
+    return redirect('OCIAParticipantNavigationView')
 
 ####################################################################################################
 #   ___   ____ ___    _      ____            _   _      _                   _                      #

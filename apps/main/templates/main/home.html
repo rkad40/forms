@@ -1,0 +1,17 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+<main class="container-xl py-4">
+    {% if site.home_page_content %}
+        {{ site.home_page_content|safe }}
+    {% else %}
+        <h2>Available Forms</h2>
+        <p>Please select a form to begin.</p>
+        <p>
+            <a class="btn btn-primary" href="{% url 'OCIAParticipantEntryView' %}">
+                OCIA Participant Form
+            </a>
+        </p>
+    {% endif %}
+</main>
+{% endblock %}

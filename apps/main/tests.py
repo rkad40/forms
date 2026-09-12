@@ -1,4 +1,7 @@
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
+from django.urls import reverse
+
+from main.models import SiteSettings
 
 from proj.config import dev, prod
 
@@ -22,3 +25,32 @@ class DeploymentSecuritySettingsTests(SimpleTestCase):
         self.assertTrue(dev.HTTP_ROOT.startswith('http://'))
         self.assertFalse(dev.SESSION_COOKIE_SECURE)
         self.assertFalse(dev.CSRF_COOKIE_SECURE)
+
+
+class HomePageTests(TestCase):
+    def setUp(self):
+        self.site = SiteSettings.objects.create(
+            title='Sacred Heart Forms',
+            icon='/static/main/site/img/favicon.png',
+            banner_bg_color='#123456',
+            banner_fg_color='#ffffff',
+        )
+
+    def test_home_page_displays_default_form_link(self):
+        response = self.client.get(reverse('home'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'OCIA Participant Form')
+        self.assertContains(response, reverse('OCIAParticipantEntryView'))
+
+    def test_home_page_displays_configured_html(self):
+        self.site.home_page_content = (
+            '<h2>Choose a form</h2><a href="/example/">Example</a>'
+        )
+        self.site.save()
+
+        response = self.client.get(reverse('home'))
+
+        self.assertContains(response, '<h2>Choose a form</h2>', html=True)
+        self.assertContains(response, '<a href="/example/">Example</a>', html=True)
+        self.assertNotContains(response, 'OCIA Participant Form')

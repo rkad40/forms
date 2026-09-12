@@ -19,12 +19,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from typing import TYPE_CHECKING
-from apps.ocia_participant.views import OCIAParticipantNavigationOrStartView
+from apps.main.views import home
 import debug_toolbar
 
 urlpatterns = [
-    path('', OCIAParticipantNavigationOrStartView, name='home'),
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
+    path('summernote/', include('django_summernote.urls')),
     path('main/', include('main.urls')),
     path('ocia/participant/', include('ocia_participant.urls')),
     path('maven/', include('maven.urls')), 

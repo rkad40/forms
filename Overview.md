@@ -2,11 +2,11 @@
 
 > Purpose: a compact, code-grounded knowledge base for AI-assisted maintenance. Search this file by the headings, symbols, route names, model names, or task keywords below. Re-check the referenced source before changing behavior: this is a retrieval map, not a replacement for the code.
 >
-> Snapshot reviewed: 2026-09-08. Primary application: `apps/ocia_participant`. Supporting applications: `apps/main` and `apps/maven`.
+> Snapshot reviewed: 2026-09-12. Primary application: `apps/ocia_participant`. Supporting applications: `apps/main` and `apps/maven`.
 
 ## 1. Executive summary
 
-This repository is a Django 5.2.5 site whose public root is an OCIA (Order of Christian Initiation of Adults) participant registration and self-service editing workflow. A participant enters an email address, receives a one-time link, creates or opens a registration, and navigates among personal, religious, engagement, marriage, parent, and questionnaire records.
+This repository is a Django 5.2.5 site whose public root is an administrator-configurable forms landing page. Its primary form is the OCIA (Order of Christian Initiation of Adults) participant registration and self-service editing workflow. A participant enters an email address, receives a one-time link, creates or opens a registration, and navigates among personal, religious, engagement, marriage, parent, and questionnaire records.
 
 The OCIA workflow does **not** use Django's authenticated `User`. It treats a Django session key (`participant_id`) as the effective login. Email-link state is held in additional Django session keys. `OCIAParticipantSession` exists as a second, database-backed session concept, but the current authorization checks ultimately rely on `participant_id` and a corresponding participant row.
 
@@ -34,23 +34,24 @@ The application is a server-rendered monolith:
 | `apps/ocia_participant/templates/ocia/` | Pages, conditional field JS, submit-button contracts | UI and POST intent |
 | `apps/ocia_participant/admin.py` | Staff data management and inline layout | Back-office behavior |
 | `apps/ocia_participant/tests.py` | Small current regression suite | Existing intended behavior |
-| `apps/main/models.py` | Global `SiteSettings` and computed theme colors | Branding/template context |
+| `apps/main/models.py` | Global `SiteSettings`, editable homepage HTML, and computed theme colors | Branding/homepage/template context |
 | `apps/main/templates/main/base.html` | Shared layout, CSS, JS `FieldManager`, flatpickr setup | Cross-form UI behavior |
+| `apps/main/templates/main/home.html` | Public forms landing page and blank-content fallback | Homepage/form-selection behavior |
 | `apps/main/templates/main/form.html` | Generic field/help/error renderer | All ModelForm display |
 | `apps/maven/` | Independent media library/explorer | Only media-related tasks |
 | `lib/util.py` | Color helpers and random token helper | Theme/session token details |
 | `lib/whisper.py` | Fernet decrypt/encrypt with embedded key | Credential/config security |
 
-Local migration files are present and the current SQLite database is aligned with them. Maven migration `0002` uses an idempotent `DROP TABLE IF EXISTS` for a removed legacy model; OCIA migrations are applied through `0010`. Migration `0009` additively creates the access-token table, and `0010` normalizes participant emails and adds normalized, case-insensitive database uniqueness without deleting or merging participant records.
+Local migration files are present and the current SQLite database is aligned with them. Main migration `0002` adds `SiteSettings.home_page_content`; the two published `django_summernote` migrations are also applied. Maven migration `0002` uses an idempotent `DROP TABLE IF EXISTS` for a removed legacy model; OCIA migrations are applied through `0010`. Migration `0009` additively creates the access-token table, and `0010` normalizes participant emails and adds normalized, case-insensitive database uniqueness without deleting or merging participant records.
 
 ## 3. Runtime topology
 
 ```text
 Browser
   -> proj/urls.py
-     -> /                         OCIAParticipantNavigationOrStartView
+     -> /                         main.home forms landing page
      -> /admin/                   Django admin
-     -> /ocia/participant/...     apps/ocia_participant/urls.py
+     -> /ocia/participant/...     session-aware OCIA entry and workflow routes
      -> /maven/...                media manager
   -> function view
   -> OCIAParticipantView helper loads SiteSettings + OCIAParticipantSettings
@@ -194,6 +195,7 @@ All names below are global (no app namespace). The included prefix is `/ocia/par
 
 | Relative path | View/purpose |
 |---|---|
+| `` (prefix root) | redirect to login without a valid participant session; otherwise redirect to the self-service dashboard |
 | `participant` | start; redirects to login |
 | `login` | email entry and lookup |
 | `access/notification/existing` | send/render existing-user link notice |
@@ -214,7 +216,7 @@ All names below are global (no app namespace). The included prefix is `/ocia/par
 | `error` | consumes and displays session error |
 | `test` | test page; reachable route |
 
-Top-level `/` chooses the dashboard when `participant_id` resolves, otherwise redirects into login. `/main/` includes an empty URLconf. `/admin/` and `/maven/` are also mounted.
+Top-level `/` renders the configurable forms landing page. The landing page's default OCIA link targets `/ocia/participant/`; that entry route redirects to login when `participant_id` does not resolve and to the navigation dashboard when it does. `/main/` includes an empty URLconf. `/admin/`, `/summernote/`, and `/maven/` are also mounted.
 
 ## 9. View conventions
 
@@ -228,6 +230,8 @@ Errors are stored in session as HTML-containing strings and rendered by `ocia-pa
 
 `apps/main/templates/main/base.html` owns the page shell, Bootstrap styling, theme CSS variables, jQuery, Font Awesome, dialog assets, flatpickr, and a generic `FieldManager`. Child forms override `{% block form-logic %}` to show/hide fields based on current answers. The generic `main/form.html` loops over fields and renders help/error text with `|safe`.
 
+`main/home.html` renders `SiteSettings.home_page_content` with `|safe`. This is trusted administrator-authored HTML; do not grant Site Settings access to untrusted users or interpolate untrusted content into it. Because the database value is emitted as HTML rather than compiled as a Django template, template tags such as `{% url ... %}` inside the editor content are not evaluated. Use root-relative links such as `/ocia/participant/`. When the field is blank, the template displays an Available Forms heading and an OCIA Participant Form link.
+
 Each OCIA create/update template is intentionally separate even when it wraps the same form. This permits different headings, buttons, and wizard/navigation behavior. When adding a model field, inspect all create/update templates plus each form's `Meta.widgets` and conditional JS.
 
 The navigation template uses related objects to show edit/add/delete actions for each registration section. It is the best UI-level index of which records are optional, singular, or repeatable.
@@ -236,11 +240,12 @@ Static dependencies are committed under `apps/main/static/main/site/vendor`; thi
 
 ## 11. Admin behavior
 
-`OCIAParticipantAdmin` shows religion, marriages, engagement, parents, and questions as stacked inlines; lists participants by year/name/email/phone and supports year filtering and name/email search. Admin constraints (`max_num` for parents/one-to-ones) guide staff UI but do not create database constraints. `OCIAParticipantSettings` is managed as a singleton. `SiteSettings` also enforces singleton behavior in `clean()`/`save()` and computes transient theme color attributes in `fetch()`.
+`OCIAParticipantAdmin` shows religion, marriages, engagement, parents, and questions as stacked inlines; lists participants by year/name/email/phone and supports year filtering and name/email search. Admin constraints (`max_num` for parents/one-to-ones) guide staff UI but do not create database constraints. `OCIAParticipantSettings` is managed as a singleton. `SiteSettings` also enforces singleton behavior in `clean()`/`save()`, computes transient theme color attributes in `fetch()`, and exposes `home_page_content` through `SummernoteModelAdmin`.
 
 ## 12. Configuration and deployment assumptions
 
-- Django version is pinned to 5.2.5 in both requirement files; local dependencies are fully pinned, server dependencies mostly are not.
+- Django version is pinned to 5.2.5 and `django-summernote` to 0.8.20.0 in both requirement files; local dependencies are fully pinned, server dependencies mostly are not.
+- `proj.summernote.SummernoteConfig` keeps Summernote's attachment primary key on `AutoField`, matching the package's published migrations while the project default remains `BigAutoField`.
 - The database is SQLite at `BASE_DIR/data/data.db3`.
 - Static output is `BASE_DIR/static`; uploaded media is `BASE_DIR/media` and is served through `static()` in the root URLconf.
 - `TIME_ZONE = 'UTC'` with timezone-aware datetimes.
@@ -252,14 +257,14 @@ Static dependencies are committed under `apps/main/static/main/site/vendor`; thi
 - SMTP username/password ciphertext is committed in settings and decrypted using a Fernet key committed in `lib/whisper.py`. This is obfuscation, not secret separation. Rotate credentials and load secrets from the environment or a secret manager.
 - `SECRET_KEY` is committed. Production must use a secret supplied outside source control.
 
-## 13. Current verification baseline (2026-09-08)
+## 13. Current verification baseline (2026-09-12)
 
 - All formerly invalid `CharField` declarations have valid `max_length` values and migration state is established.
 - `python manage.py check` reports no issues.
 - The pre-migration participant audit found 24 records, no normalized duplicate groups, no blank emails, and 9 values needing trim/lowercase normalization. Migration `0010` preserved all 24 records; its data step aborts before normalization and lists conflicting participant IDs if duplicate groups exist in another deployment.
 - `python manage.py makemigrations --check --dry-run` reports no changes.
-- `python manage.py migrate` completes, with Maven and OCIA migrations fully applied.
-- `python manage.py test` creates a fresh SQLite test database and passes 26 tests.
+- `python manage.py migrate` completes, with Main, Summernote, Maven, and OCIA migrations fully applied.
+- `python manage.py test` creates a fresh SQLite test database and passes 30 tests.
 - `DJANGO_ENV=prod python manage.py check --deploy` now reports only the separately tracked committed `SECRET_KEY` warning and the intentionally disabled HSTS-preload warning.
 
 OCIA regression coverage now includes cross-browser access, non-consuming confirmation GETs, CSRF-protected token consumption, one-time-use enforcement, tampered/expired/replaced tokens, new-registration authorization, legacy-link compatibility, owned deletion, cross-participant deletion attempts for marriage/engagement/parent records, POST enforcement, unknown categories, logged-out access, and editing-disabled behavior. Coverage remains limited for the full email-link flow, model forms, wizard branches, broader CRUD, email failures, expiration, and cross-browser behavior. Maven's fixture setup explicitly creates its expected empty directory, and its file-move path handling is covered by the passing Maven test.
@@ -272,7 +277,7 @@ OCIA regression coverage now includes cross-browser access, non-consuming confir
 
 ### Medium
 
-1. HTML error strings and `|safe` rendering increase XSS risk if future messages interpolate user-controlled input.
+1. HTML error strings and `|safe` rendering increase XSS risk if future messages interpolate user-controlled input. Homepage HTML is also rendered with `|safe` and therefore must remain limited to trusted Site Settings administrators.
 2. `get_client_ip()` trusts the first `X-Forwarded-For` value without a trusted-proxy policy.
 3. Production reverse-proxy HTTPS handling still requires deployment verification before setting `SECURE_PROXY_SSL_HEADER`; HSTS preload must remain off until every relevant subdomain is permanently HTTPS-capable.
 4. `DJANGO_ENV` has a hostname-based compatibility fallback when unset; production and automation should always set it explicitly.
@@ -336,6 +341,7 @@ Remaining priorities:
 - **wizard / registration order / branching:** religion, engagement, marriage, parent, questions create views.
 - **schema / participant data:** `apps/ocia_participant/models.py`, relationship overview above.
 - **validation / fields / widgets:** `apps/ocia_participant/forms.py`, `main/form.html`, `base.html` FieldManager.
+- **homepage / form selection / Summernote:** `main.home`, `main/home.html`, `SiteSettings.home_page_content`, `SiteSettingsAdmin`.
 - **branding / colors / site icon:** `SiteSettings`, `lib.util.color_variant`, base template CSS variables.
 - **email identity / uniqueness / duplicate audit:** `OCIAParticipant.save()`, `OCIAParticipantForm.clean_email()`, migration `0010`, and login lookup.
 - **email / SMTP / fake email:** settings email block and access notification views/templates.

@@ -133,6 +133,43 @@ class NavigationWithoutSessionViewTests(TestCase):
         self.assertRedirects(response, reverse('OCIAParticipantErrorView'))
 
 
+class ParticipantEntryViewTests(TestCase):
+    def setUp(self):
+        SiteSettings.objects.create(
+            pk=1,
+            title="Test Site",
+            icon="test-icon.png",
+            banner_bg_color="#ffffff",
+            banner_fg_color="#000000",
+        )
+        OCIAParticipantSettings.objects.create(
+            pk=1,
+            access_code="pray247",
+            liturgical_year="2025-26",
+            enable_editing=True,
+        )
+
+    def test_redirects_to_login_without_participant_session(self):
+        response = self.client.get(reverse('OCIAParticipantEntryView'))
+
+        self.assertRedirects(response, reverse('OCIAParticipantLoginView'))
+
+    def test_redirects_to_editor_with_participant_session(self):
+        participant = OCIAParticipant.objects.create(
+            first_name="Alice",
+            last_name="Participant",
+            email="alice@example.com",
+            liturgical_year="2025-26",
+        )
+        session = self.client.session
+        session["participant_id"] = participant.id
+        session.save()
+
+        response = self.client.get(reverse('OCIAParticipantEntryView'))
+
+        self.assertRedirects(response, reverse('OCIAParticipantNavigationView'))
+
+
 from ocia_participant.views import validate_email
 
 class EmailValidationTests(TestCase):

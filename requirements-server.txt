@@ -2,6 +2,7 @@ asgiref
 cffi
 cryptography
 Django==5.2.5
+django-summernote==0.8.20.0
 filelock
 pillow
 pycparser
