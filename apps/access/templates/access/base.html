@@ -1,0 +1,25 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Administration{% endblock %} | Sacred Heart Forms</title>
+    <link rel="stylesheet" href="{% static 'main/site/vendor/bootstrap/css/bootstrap.min.css' %}">
+    <style>
+        body { background: #f4f6f8; }
+        .auth-card { max-width: 28rem; margin: 8vh auto; border: 0; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); }
+        .auth-card .card-header { background: #8b1e2d; color: white; }
+        .auth-card label { font-weight: 600; }
+        .auth-card input { display: block; width: 100%; padding: .5rem .75rem; border: 1px solid #ced4da; border-radius: .25rem; }
+    </style>
+</head>
+<body>
+<main class="container">
+    <section class="card auth-card">
+        <header class="card-header py-3"><h1 class="h4 mb-0">{% block heading %}Administration{% endblock %}</h1></header>
+        <div class="card-body p-4">{% block content %}{% endblock %}</div>
+    </section>
+</main>
+</body>
+</html>

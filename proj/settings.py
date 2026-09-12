@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'main',
     'maven',
     'ocia_participant',
+    'access',
     # 'debug_toolbar',
 ]
 
@@ -152,6 +153,9 @@ if True:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL = '/admin/'
+
 # RK - Email settings 25-09-05
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.googlemail.com'
@@ -173,6 +177,14 @@ elif environment == 'prod':  # pragma: no cover
     from proj.config.prod import *  # pragma: no cover
 else:
     raise RuntimeError("DJANGO_ENV must be either 'dev' or 'prod'.")
+
+# Never deliver real email from a debug server. Password-reset messages are
+# printed to the runserver console in debug mode and sent by SMTP otherwise.
+EMAIL_BACKEND = (
+    'django.core.mail.backends.console.EmailBackend'
+    if DEBUG
+    else 'django.core.mail.backends.smtp.EmailBackend'
+)
 
 # Added 2025-09-10 to enable logging.
 LOGGING = {
