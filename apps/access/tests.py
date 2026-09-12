@@ -37,6 +37,22 @@ class AdminAuthenticationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
+    def test_legacy_account_can_login_with_username_or_email(self):
+        get_user_model().objects.create_user(
+            username="admin",
+            email="legacy.admin@example.com",
+            password="legacy-safe-password",
+            is_staff=True,
+        )
+        for identifier in ("admin", "legacy.admin@example.com"):
+            with self.subTest(identifier=identifier):
+                response = self.client.post(
+                    reverse("admin_login"),
+                    {"username": identifier, "password": "legacy-safe-password"},
+                )
+                self.assertRedirects(response, reverse("access_actions"))
+                self.client.logout()
+
     def test_password_reset_sends_link_to_staff_user(self):
         response = self.client.post(reverse("password_reset"), {"email": self.user.email})
         self.assertRedirects(response, reverse("password_reset_done"))

@@ -7,12 +7,30 @@ from django.db.models import Q
 class AdminAuthenticationForm(AuthenticationForm):
     """Only allow active staff members into the administration site."""
 
-    username = forms.EmailField(
-        label="Email", max_length=150, widget=forms.EmailInput()
+    username = forms.CharField(
+        label="Email",
+        max_length=254,
+        widget=forms.TextInput(attrs={"autocomplete": "username"}),
     )
 
     def clean_username(self):
-        return self.cleaned_data["username"].strip().lower()
+        identifier = self.cleaned_data["username"].strip()
+        users = get_user_model().objects
+
+        # Preserve direct username login, including the legacy admin account.
+        username_matches = users.filter(username__iexact=identifier)
+        if username_matches.count() == 1:
+            return username_matches.values_list("username", flat=True).get()
+
+        # Django's authentication backend expects a username, so resolve an
+        # email address to its canonical username.
+        email_matches = users.filter(email__iexact=identifier)
+        if email_matches.count() == 1:
+            return email_matches.values_list("username", flat=True).get()
+
+        # Let Django return its standard invalid-login response for unknown or
+        # ambiguous identifiers without disclosing which accounts exist.
+        return identifier
 
     def confirm_login_allowed(self, user):
         super().confirm_login_allowed(user)
