@@ -20,7 +20,6 @@ from django.contrib import admin
 from django.urls import path, include
 from typing import TYPE_CHECKING
 from apps.main.views import home
-import debug_toolbar
 
 admin.site.site_url = '/admin/actions/'
 
@@ -36,5 +35,5 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include('debug_toolbar.urls')),
     ]
