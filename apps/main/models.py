@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 import lib.util as util
 
 class SiteSettings(models.Model):
@@ -36,3 +37,45 @@ class SiteSettings(models.Model):
     class Meta:
         verbose_name = "Site Settings"
         verbose_name_plural = "Site Settings"
+
+
+class HomePageLink(models.Model):
+    class Visibility(models.IntegerChoices):
+        EVERYONE = 0, "Everyone"
+        STAFF = 1, "Staff"
+        ADMIN = 2, "Admin"
+
+    site_settings = models.ForeignKey(
+        SiteSettings,
+        on_delete=models.CASCADE,
+        related_name="home_page_links",
+    )
+    title = models.CharField(max_length=200)
+    description = models.CharField(max_length=500, blank=True)
+    url = models.CharField(
+        max_length=500,
+        help_text="Use a root-relative path such as /ocia/participant/ or a full URL.",
+    )
+    rank = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        db_index=True,
+    )
+    verbosity = models.PositiveSmallIntegerField(
+        choices=Visibility.choices,
+        default=Visibility.EVERYONE,
+        help_text="Minimum access level required to show this link.",
+    )
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ("rank", "title", "pk")
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(verbosity__gte=0, verbosity__lte=2),
+                name="main_homepagelink_valid_verbosity",
+            ),
+        ]
+
+    def __str__(self):
+        return self.title

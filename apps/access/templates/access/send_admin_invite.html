@@ -2,7 +2,7 @@
 {% block title %}Send Admin Invite{% endblock %}
 {% block heading %}Send Admin Invite{% endblock %}
 {% block content %}
-<p>Enter the email address for the new administrator. The invitation expires in 48 hours and can only be used once.</p>
+<p>Enter the email address for the new staff member. The invitation expires in 48 hours and can only be used once.</p>
 <form method="post" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}

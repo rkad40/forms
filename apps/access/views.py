@@ -1,14 +1,16 @@
 import hashlib
+import logging
 import secrets
 from datetime import timedelta
 from hmac import compare_digest
 
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from django.db import transaction
 from django.db.models import Q
 from django.http import Http404
@@ -23,6 +25,9 @@ from .forms import (
     UserInformationForm,
 )
 from .models import AdminInvite
+
+
+logger = logging.getLogger(__name__)
 
 
 def _token_hash(token):
@@ -40,6 +45,57 @@ class AccessLoginView(LoginView):
 
     def get_success_url(self):
         return reverse("access_actions")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self._notify_admins_of_first_login()
+        return response
+
+    def _notify_admins_of_first_login(self):
+        try:
+            with transaction.atomic():
+                invite = (
+                    AdminInvite.objects.select_for_update()
+                    .filter(
+                        accepted_user=self.request.user,
+                        used_at__isnull=False,
+                        first_login_notified_at__isnull=True,
+                    )
+                    .first()
+                )
+                if invite is None:
+                    return
+                admin_emails = list(
+                    get_user_model()
+                    .objects.filter(
+                        is_active=True,
+                        is_superuser=True,
+                    )
+                    .exclude(email="")
+                    .values_list("email", flat=True)
+                    .distinct()
+                )
+                name = self.request.user.get_full_name() or self.request.user.email
+                messages_to_send = tuple(
+                    (
+                        "New Sacred Heart Forms staff member signed in",
+                        (
+                            f"{name} ({self.request.user.email}) signed in for the "
+                            "first time after accepting an invitation."
+                        ),
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                    )
+                    for email in admin_emails
+                )
+                if messages_to_send:
+                    send_mass_mail(messages_to_send)
+                invite.first_login_notified_at = timezone.now()
+                invite.save(update_fields=("first_login_notified_at",))
+        except Exception:
+            # A notification failure must not prevent a valid staff login. Leaving
+            # the timestamp empty allows the next login to retry delivery.
+            logger.exception("Unable to notify administrators of a first staff login.")
 
 
 @login_required
@@ -121,18 +177,19 @@ def accept_admin_invite(request, uid, token):
                 Q(username__iexact=email) | Q(email__iexact=email)
             ).exists():
                 raise Http404("This administrator invitation is no longer available.")
-            get_user_model().objects.create_user(
+            user = get_user_model().objects.create_user(
                 username=email,
                 email=email,
                 first_name=form.cleaned_data["first_name"],
                 last_name=form.cleaned_data["last_name"],
                 password=form.cleaned_data["password1"],
                 is_staff=True,
-                is_superuser=True,
+                is_superuser=False,
             )
+            invite.accepted_user = user
             invite.used_at = timezone.now()
             invite.is_valid = False
-            invite.save(update_fields=("used_at", "is_valid"))
-        messages.success(request, "Your administrator account is ready. Please log in.")
+            invite.save(update_fields=("accepted_user", "used_at", "is_valid"))
+        messages.success(request, "Your staff account is ready. Please log in.")
         return redirect("admin_login")
     return render(request, "access/accept_admin_invite.html", {"form": form})

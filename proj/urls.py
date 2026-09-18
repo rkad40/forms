@@ -22,6 +22,8 @@ from typing import TYPE_CHECKING
 from apps.main.views import home
 import debug_toolbar
 
+admin.site.site_url = '/admin/actions/'
+
 urlpatterns = [
     path('', home, name='home'),
     path('admin/', include('apps.access.urls')),

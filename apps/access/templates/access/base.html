@@ -1,4 +1,5 @@
-{% load static %}
+{% load static access_theme %}
+{% access_site_settings as site %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,11 +8,31 @@
     <title>{% block title %}Administration{% endblock %} | Sacred Heart Forms</title>
     <link rel="stylesheet" href="{% static 'main/site/vendor/bootstrap/css/bootstrap.min.css' %}">
     <style>
+        :root {
+            --access-primary: {{ site.banner_bg_color|default:"#8b1e2d" }};
+            --access-primary-hover: {{ site.primary_bg_color_10|default:"#731925" }};
+            --access-primary-foreground: {{ site.banner_fg_color|default:"#ffffff" }};
+        }
         body { background: #f4f6f8; }
         .auth-card { max-width: 38rem; margin: 8vh auto; border: 0; box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12); }
-        .auth-card .card-header { background: #8b1e2d; color: white; }
+        .auth-card .card-header {
+            background: var(--access-primary);
+            color: var(--access-primary-foreground);
+        }
         .auth-card label { font-weight: 600; }
         .auth-card input { display: block; width: 100%; padding: .5rem .75rem; border: 1px solid #ced4da; border-radius: .25rem; }
+        .auth-card .btn-primary {
+            background-color: var(--access-primary);
+            border-color: var(--access-primary);
+            color: var(--access-primary-foreground);
+        }
+        .auth-card .btn-primary:hover,
+        .auth-card .btn-primary:focus {
+            background-color: var(--access-primary-hover);
+            border-color: var(--access-primary-hover);
+            color: var(--access-primary-foreground);
+        }
+        .auth-card a:not(.btn):not(.list-group-item) { color: var(--access-primary); }
     </style>
 </head>
 <body>

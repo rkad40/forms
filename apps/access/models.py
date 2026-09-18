@@ -15,9 +15,17 @@ class AdminInvite(models.Model):
         on_delete=models.SET_NULL,
         related_name="admin_invites_sent",
     )
+    accepted_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="accepted_admin_invite",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
+    first_login_notified_at = models.DateTimeField(null=True, blank=True)
     is_valid = models.BooleanField(default=True)
 
     class Meta:

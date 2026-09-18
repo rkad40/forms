@@ -1,17 +1,19 @@
-{% extends "main/base.html" %}
+{% extends "access/base.html" %}
 
+{% block title %}{{ site.title }}{% endblock %}
+{% block heading %}{{ site.title }}{% endblock %}
 {% block content %}
-<main class="container-xl py-4">
-    {% if site.home_page_content %}
-        {{ site.home_page_content|safe }}
-    {% else %}
-        <h2>Available Forms</h2>
-        <p>Please select a form to begin.</p>
-        <p>
-            <a class="btn btn-primary" href="{% url 'OCIAParticipantEntryView' %}">
-                OCIA Participant Form
-            </a>
-        </p>
-    {% endif %}
-</main>
+{% if site.home_page_content %}
+<div class="mb-3">{{ site.home_page_content|safe }}</div>
+{% endif %}
+<div class="list-group">
+    {% for link in home_page_links %}
+    <a class="list-group-item list-group-item-action" href="{{ link.url }}">
+        <strong>{{ link.title }}</strong>
+        {% if link.description %}<br><small>{{ link.description }}</small>{% endif %}
+    </a>
+    {% empty %}
+    <div class="text-muted">No links are currently available.</div>
+    {% endfor %}
+</div>
 {% endblock %}

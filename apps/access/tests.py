@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from .models import AdminInvite
 from .email import email_backend_for_debug
+from main.models import SiteSettings
 
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
@@ -109,8 +110,25 @@ class AdminActionsTests(TestCase):
     def test_staff_actions_do_not_show_admin_invite(self):
         self.client.force_login(self.staff)
         response = self.client.get(reverse("access_actions"))
+        self.assertContains(response, f'href="{reverse("home")}"')
+        self.assertContains(response, "Return to Home Page")
         self.assertContains(response, "Go to Admin Dashboard")
         self.assertNotContains(response, "Send Admin Invite")
+
+    def test_access_pages_use_site_banner_colors(self):
+        SiteSettings.objects.update_or_create(
+            pk=1,
+            defaults={
+                "title": "Sacred Heart Forms",
+                "icon": "/static/main/site/icon.png",
+                "banner_bg_color": "#123456",
+                "banner_fg_color": "#fedcba",
+            },
+        )
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("access_actions"))
+        self.assertContains(response, "--access-primary: #123456")
+        self.assertContains(response, "--access-primary-foreground: #fedcba")
 
     def test_updating_email_also_updates_username(self):
         self.client.force_login(self.staff)
@@ -132,7 +150,7 @@ class AdminActionsTests(TestCase):
         response = self.client.get(reverse("send_admin_invite"))
         self.assertEqual(response.status_code, 403)
 
-    def test_admin_invite_creates_superuser_and_is_single_use(self):
+    def test_admin_invite_creates_staff_user_and_is_single_use(self):
         self.client.force_login(self.admin)
         response = self.client.post(
             reverse("send_admin_invite"),
@@ -160,8 +178,63 @@ class AdminActionsTests(TestCase):
         user = get_user_model().objects.get(username="new.admin@example.com")
         self.assertEqual(user.email, user.username)
         self.assertTrue(user.is_staff)
-        self.assertTrue(user.is_superuser)
+        self.assertFalse(user.is_superuser)
         invite.refresh_from_db()
+        self.assertEqual(invite.accepted_user, user)
         self.assertIsNotNone(invite.used_at)
 
         self.assertEqual(self.client.get(invite_path).status_code, 404)
+
+    def test_admins_are_notified_only_on_invited_users_first_login(self):
+        second_admin = get_user_model().objects.create_superuser(
+            username="second.owner@example.com",
+            email="second.owner@example.com",
+            password="a-safe-password",
+        )
+        self.client.force_login(self.admin)
+        self.client.post(
+            reverse("send_admin_invite"),
+            {"email": "new.staff@example.com"},
+        )
+        invite_path = mail.outbox[0].body.splitlines()[3]
+
+        self.client.logout()
+        self.client.post(
+            invite_path,
+            {
+                "first_name": "New",
+                "last_name": "Staff",
+                "password1": "another-safe-password-934",
+                "password2": "another-safe-password-934",
+            },
+        )
+        mail.outbox.clear()
+
+        response = self.client.post(
+            reverse("admin_login"),
+            {
+                "username": "new.staff@example.com",
+                "password": "another-safe-password-934",
+            },
+        )
+        self.assertRedirects(response, reverse("access_actions"))
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(
+            {message.to[0] for message in mail.outbox},
+            {self.admin.email, second_admin.email},
+        )
+        self.assertTrue(
+            all("first time" in message.body for message in mail.outbox)
+        )
+        invite = AdminInvite.objects.get(email="new.staff@example.com")
+        self.assertIsNotNone(invite.first_login_notified_at)
+
+        self.client.logout()
+        self.client.post(
+            reverse("admin_login"),
+            {
+                "username": "new.staff@example.com",
+                "password": "another-safe-password-934",
+            },
+        )
+        self.assertEqual(len(mail.outbox), 2)

@@ -4,6 +4,9 @@
 {% block content %}
 <p class="text-muted">Signed in as {{ user.email|default:user.username }}</p>
 <div class="list-group">
+    <a class="list-group-item list-group-item-action" href="{% url 'home' %}">
+        <strong>Return to Home Page</strong><br><small>Go back to the site landing page.</small>
+    </a>
     <a class="list-group-item list-group-item-action" href="{% url 'admin:index' %}">
         <strong>Go to Admin Dashboard</strong><br><small>Manage site content and records.</small>
     </a>
